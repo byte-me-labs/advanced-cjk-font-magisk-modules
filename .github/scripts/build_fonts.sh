@@ -9,9 +9,9 @@
 #   1. 用 gh api 取上游 latest release 的 tag_name 作为版本号；
 #   2. 若为定时触发（SKIP_PUBLISHED=true）且本仓库已存在 "slug-tag" 这个 tag 则跳过；
 #      手动触发（workflow_dispatch）时 SKIP_PUBLISHED=false，强制重建并重新发布；
-#   3. 下载字体（保留上游原始文件名）、组装模块、从 .github/fonts/<slug>/fonts.xml 与
-#      .github/fonts/<slug>/font_fallback.xml 拷贝预设字体配置（无需运行时改名）、
-#      写入 module.prop、携带许可证、打包 zip；
+#   3. 下载字体（保留上游原始文件名）、组装模块、生成字重映射文件 font_map.txt、
+#      写入 module.prop、携带许可证、打包 zip；fonts.xml 与 font_fallback.xml 不在
+#      构建期生成，而是由 customize.sh 在安装时读取设备原厂配置、替换 CJK 族动态生成；
 #   4. 产物写到 dist/ 并输出发布信息，由工作流的 softprops/action-gh-release
 #      步骤创建 Release 并上传 zip。
 #
@@ -32,9 +32,10 @@ DRY_RUN="${DRY_RUN:-}"
 # 定时触发时跳过已发布版本；手动触发时强制重建（默认 true，仅在未显式传入时兜底）
 SKIP_PUBLISHED="${SKIP_PUBLISHED:-true}"
 
-# 模板骨架：整目录复制（META-INF、system 为顶层目录，复制整棵子树以保留嵌套结构）
-#   + 单文件复制（模块根目录的脚本/配置）
-SKELETON_DIRS=(META-INF system)
+# 模板骨架：整目录复制（META-INF 为顶层目录）+ 单文件复制（模块根目录的脚本/配置）。
+# system/ 不再作为静态骨架复制：字体文件运行时组装进 system/fonts/，
+# fonts.xml 与 font_fallback.xml 由 customize.sh 在安装时根据设备原厂配置动态生成。
+SKELETON_DIRS=(META-INF)
 SKELETON_FILES=(customize.sh post-fs-data.sh service.sh uninstall.sh sepolicy.rule system.prop)
 
 info() { printf '\033[1;34m[%s]\033[0m %s\n' "$1" "$2"; }
@@ -157,23 +158,34 @@ else
   done < <(jq -c '.download.entries[]' <<<"$font")
 fi
 
+# 给定目标字重（100..900），从已下载字体的字重集合里取最接近的文件路径（平手取较细者）
+nearest_file() {
+  local target="$1" best="" bd=99 w d
+  local want=$((target / 100))
+  for w in 1 2 3 4 5 6 7 8 9; do
+    [[ -n "${weights[$w]:-}" ]] || continue
+    d=$((w - want)); ((d < 0)) && d=$((-d))
+    if ((d < bd)); then bd=$d; best=$w; fi
+  done
+  printf '%s' "${weights[$best]}"
+}
+
 # 组装模块目录
 mod="$work/$slug"; mkdir -p "$mod"
 for d in "${SKELETON_DIRS[@]}"; do cp -a "$ROOT/$d" "$mod/"; done
 for f in "${SKELETON_FILES[@]}"; do cp -a "$ROOT/$f" "$mod/"; done
 
-fontsdir="$mod/system/fonts"
-# 字体文件保留上游原始文件名，预设的 fonts.xml / font_fallback.xml 直接引用这些名字
+# 字体文件保留上游原始文件名，放入 system/fonts/
+fontsdir="$mod/system/fonts"; mkdir -p "$fontsdir"
 for f in "${weights[@]}"; do cp "$f" "$fontsdir/"; done
 
-# 拷贝预设字体配置（去重后的最终引用已预先写好，无需运行时改名）
-preset_dir="$ROOT/.github/fonts/$slug"
-preset_fonts="$preset_dir/fonts.xml"
-preset_fallback="$preset_dir/font_fallback.xml"
-[[ -f "$preset_fonts" ]] || { warn "$slug 缺少预设 $preset_fonts"; exit 1; }
-[[ -f "$preset_fallback" ]] || { warn "$slug 缺少预设 $preset_fallback"; exit 1; }
-cp "$preset_fonts" "$mod/system/etc/fonts.xml"
-cp "$preset_fallback" "$mod/system/etc/font_fallback.xml"
+# 生成字重映射文件 font_map.txt（字重 100..900 -> 字体文件名，按最接近字重取文件），
+# 供 customize.sh 在安装时读取设备原厂 fonts.xml / font_fallback.xml 并替换 CJK 族。
+: > "$mod/font_map.txt"
+for w in 100 200 300 400 500 600 700 800 900; do
+  f="$(nearest_file "$w")"
+  printf '%s %s\n' "$w" "$(basename "$f")" >> "$mod/font_map.txt"
+done
 
 # 许可证
 while IFS= read -r lic; do
@@ -191,7 +203,7 @@ done < <(jq -r '.license.assets[]' <<<"$font")
 } > "$mod/module.prop"
 
 # 打包 zip，产物固定写到 dist/，由发布步骤（softprops/action-gh-release）上传
-zipname="$slug-$tag.zip"
+zipname="magisk-module-font-$slug-$tag.zip"
 mkdir -p "$ROOT/dist"
 zippath="$ROOT/dist/$zipname"
 (cd "$mod" && zip -rq "$zippath" .)
