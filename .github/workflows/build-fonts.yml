@@ -51,6 +51,7 @@ jobs:
                      then (.download.asset | type == "string" and length > 0)
                           and (.download.archive_format == "zip" or .download.archive_format == "7z")
                      else true end)
+              and (((.cjk_langs // ["zh-Hans", "zh-Hant,zh-Bopo", "ja", "ko"]) | type == "array" and length > 0 and ([.[] | (type == "string" and length > 0)] | all)))
               and ((.fallback // "nearest") == "nearest")
               and ((.version_code // "digits") == "digits")
             ' "$f" >/dev/null || { echo "::error file=$f::配置文件校验失败" >&2; exit 1; }

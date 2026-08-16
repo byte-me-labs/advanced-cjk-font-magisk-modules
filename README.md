@@ -1,156 +1,137 @@
 > [!CAUTION]
 > **⚠️ 重要警告**
-> - 刷机、刷入 Magisk 模块可能导致系统无法正常启动，请在操作前审慎考虑，并务必备份重要数据。因操作不当导致的任何系统故障（包括卡开机动画、功能异常等）与模块模板作者无关。
+> - 刷机、刷入 Magisk 模块可能导致系统无法正常启动，请在操作前审慎考虑，并务必备份重要数据。因操作不当导致的任何系统故障（包括卡开机动画、功能异常等）与模块作者无关。
 >
 > **📜 免责声明**
 > - 本模块按「原样」（AS-IS）提供，作者不对因使用、修改或分发本模块所导致的任何直接或间接损失承担责任。
 > - 用户须自行确保所使用的字体文件拥有合法的使用和分发授权，因字体版权引发的一切纠纷由用户自行承担。
 > - 使用本模块即表示您已阅读并同意以上条款。
->
-> **📌 项目状态**
-> - 本模板内容及相关文档可能**已过时**，本人精力和能力有限，部分兼容性问题可能无法自行解决。**欢迎通过 [Issues](https://github.com/lxgw/advanced-cjk-font-magisk-module-template/issues) 分享您的解决方案**，帮助其他用户。
->
-> **💡 使用建议**
-> - 如果您在使用过程中遇到问题：
->   - 可参考下方 **「兼容性调整」** 章节（部分信息可能已过时，仅供参考）；
->   - 欢迎在 [Issues](https://github.com/lxgw/advanced-cjk-font-magisk-module-template/issues) 中提交您的设备信息和解决方案，帮助完善兼容性列表；
->   - 亦可改用**其他仍在维护的字体模块模板**，或直接使用他人的**可用成品字体模块**并替换其中的字体文件（替换前需确认目标模块的字体配置文件中所引用的文件名及扩展名，将自己的字体文件重命名为与之完全一致即可）。
-> - 欢迎 Fork 本仓库进行二次开发。
 
-# CJK Font Magisk Module Template <sup>ADVANCED</sup> </br> CJK 字体 Magisk 模块模板 <sup>高级版</sup>
+# CJK Font Magisk Module Auto-Builder </br> CJK 字体 Magisk 模块自动构建器
 
-本项目为 **Magisk 字体模块模板**的 GitHub 发行项目。该模板用于制作 Magisk 字体模块，支持 9 个字重，可对西文、中文、日语、韩语字体进行任意搭配。在安装 Magisk 的手机上，使用该模板制作字体模块并刷入，更换字体或许会更简便。
+本项目自动检查若干开源 CJK 字体的上游仓库是否有新版本，检测到新版本后自动打包为 Magisk 模块，并发布到 [GitHub Releases](https://github.com/byte-me-labs/advanced-cjk-font-magisk-modules/releases)。刷入生成的模块即可一键换字体，无需手动改任何配置。
 
-有关套用模板的介绍和原理，请看：[为 Android 换上任意喜欢的字体，你可以试试这个 Magisk 模块（少数派）](https://sspai.com/post/58049)
+原模板出处见文末 **「致谢」**。
 
-[简易版（已归档）](https://github.com/lxgw/simple-cjk-font-magisk-module-template)
+## 工作原理
 
-## 使用方法
+整条流水线分两段：**构建期**（GitHub Actions）与**安装期**（手机上的 `customize.sh`）。
 
-1. 在 [Release](https://github.com/lxgw/advanced-cjk-font-magisk-module-template/releases/latest) 界面下载最新版本的模块模板压缩包（`FontTemplate-Magisk204.zip`，基于 Magisk 20.4 模板，更高版本 Magisk 通常也兼容）。**注意：不要直接点击 "Download Zip" 下载整个仓库，请从 Release 附件中下载。**
+### 构建期（CI）
 
-2. 利用压缩软件（电脑上如 7-Zip，手机上如 MT 管理器）打开模块模板包，进入其中的 `/system/fonts` 文件夹，向里面添加 `.ttf` 或 `.otf` 格式的字体文件。字体文件的命名按照第 3 步的指示。
+1. 工作流每天定时（UTC 03:17）运行，也可在 Actions 页手动触发；为每个字体各起一个作业并行构建。
+2. 对每个字体：
+   - 用 `gh api` 取上游仓库 `latest release` 的 `tag_name` 作为版本号；
+   - 定时触发时若本仓库已存在 `slug-版本` 这个 tag，则跳过（手动触发强制重建）；
+   - 按配置下载字体文件、下载 [`fontgen`](https://github.com/byte-me-labs/magisk-module-fontgen) 三架构二进制（arm64/arm/x64）、生成 `fontgen.json`、写入 `module.prop`、携带许可证文件，打包为 zip；
+   - 由 `softprops/action-gh-release` 创建 Release 并上传 zip。
 
-3. 要使加入的字体能够正常显示，**字体文件须遵循以下命名规则**：
-   - 将喜爱的字体文件按字重（粗细）及语言（或优先级）依次重命名为 `fontxxwy.ttf` 或 `fontxxwy.otf`，复制到模块的 `/system/fonts` 目录下，刷入后重启即可。**重命名方式如下：**
+### 安装期（customize.sh）
 
-     - `xx` 表示字体的语言代号。本模块模板支持斜体西文。
+构建期**不生成** `fonts.xml` / `font_fallback.xml`。安装时：
 
-       | xx 代号 | 语言 | 调用条件 |
-       | ------- | ---- | -------- |
-       | en      | 西文（常规） | 所有非斜体西文场景 |
-       | ei      | 西文（斜体） | 西文斜体场景 |
-       | ch      | 中文 | 系统语言为简体/繁体中文时 |
-       | kr      | 韩文 | 系统语言为韩语时 |
-       | jp      | 日文 | 系统语言为日语时 |
+1. `customize.sh` 按设备 ABI 挑选对应的 `fontgen` 二进制；
+2. `fontgen` 读取设备**原厂**的 `/system/etc/fonts.xml` 与 `/system/etc/font_fallback.xml`，把模块携带的 CJK 字体族**插入回退链起点**，原厂字体族逐字节保留（留作生僻字回退）；
+3. 生成结果写到 `$MODPATH/system/etc/`，由 Magisk 挂载覆盖系统配置。
 
-     - `wy` 表示字体的字重等级，从 1 至 9 由细到粗。**系统正文调用的基准字重（即 Regular 字重）**，`y` 数值为 4；**系统标题文本、加粗文本调用的粗字重（即 Bold 字重）**，`y` 数值为 7；Light、Medium 字重 `y` 分别为 3 和 5，`y` 越小则字重越细，越大则字重越粗。
+之所以在**安装时**而非开机时生成：安装时模块尚未挂载到 `/system`，读到的还是设备原厂配置；开机后模块已覆盖挂载，再读只会读到自己的文件，拿不到原厂配置。生成逻辑是**字节级拼接**（定位用解析、写入用拼接），不重新序列化 XML，因此原厂配置里的注释、缩进、未识别的属性都会被原样保留。
 
-       | y 值 | 字重（Font-Weight） | 中文名称 |
-       | ---- | ------------------- | -------- |
-       | 1    | Thin (100)          | 极细     |
-       | 2    | UltraLight (200)    | 纤细     |
-       | 3    | Light (300)         | 细体     |
-       | 4    | Regular (400)       | 常规     |
-       | 5    | Medium (500)        | 中等     |
-       | 6    | SemiBold (600)      | 次粗     |
-       | 7    | Bold (700)          | 粗体     |
-       | 8    | ExtraBold (800)     | 特粗     |
-       | 9    | Heavy/Black (900)   | 超粗     |
+## 支持的字体
 
-     **例如：** `fontchw4.ttf` 表示中文部分的正文字重，`fonteiw7.otf` 表示西文部分的粗斜体。
+| slug | 字体 | 上游 | 格式 |
+| ---- | ---- | ---- | ---- |
+| `lxgw-wenkai` | 霞鹜文楷 LXGW WenKai | [lxgw/LxgwWenKai](https://github.com/lxgw/LxgwWenKai) | ttf |
+| `lxgw-neo-xihei` | 霞鹜新晰黑 LXGW Neo XiHei | [lxgw/LxgwNeoXiHei](https://github.com/lxgw/LxgwNeoXiHei) | ttf |
+| `sarasa-gothic` | 更纱黑体 Sarasa Gothic | [be5invis/Sarasa-Gothic](https://github.com/be5invis/Sarasa-Gothic) | ttf |
+| `source-han-sans` | 思源黑体 Source Han Sans | [adobe-fonts/source-han-sans](https://github.com/adobe-fonts/source-han-sans) | otf |
 
-   - **关于 `.ttf` 与 `.otf` 格式：**
-     - 如果使用 `.ttf` 格式字体，直接按规则重命名即可（扩展名保持 `.ttf`）。
-     - 如果使用 `.otf` 格式字体，**建议保持扩展名为 `.otf`**，同时需要修改模块内 `system/etc/fonts.xml` 文件中对应的文件名，将 `.ttf` 改为 `.otf`。
-     - **不推荐** 强行将 `.otf` 重命名为 `.ttf`，可能在某些系统上导致字体加载失败。
+## 添加新字体
 
-4. 模块根目录的 `module.prop` 用于存放模块信息，如模块的名称、版本号、作者等。
-   - `id`：模块的唯一标识符，**只能包含英文字母、数字、下划线（_）、点号（.）和短横线（-），不能包含空格**。**相同 id 的 Magisk 模块不能共存。**
-   - `name`：模块名称，可任意填写。
-   - `version`：模块版本，可任意填写。
-   - `versionCode`：模块版本代号，必须为整数型数值。该值用于版本比较。
-   - `author`：模块作者，可任意填写。
-   - `description`：模块描述，可任意填写。
-   - 所有文本文件的行尾应以 **Unix 格式（LF）** 书写。
+在 `.github/fonts/<slug>/` 下新建一个 `config.json`，下一次工作流运行即会自动纳入构建矩阵。配置格式见下节。以「霞鹜文楷」为例：
 
-5. 将制作好的模块压缩包通过 Magisk 刷入，重启设备即可生效。
+```json
+{
+  "slug": "lxgw-wenkai",
+  "name": "霞鹜文楷 LXGW WenKai",
+  "module_id": "fonttemplate-lxgw-wenkai",
+  "upstream": "lxgw/LxgwWenKai",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "LXGWWenKai-Light\\.ttf", "weight": 3 },
+      { "from": "LXGWWenKai-Regular\\.ttf", "weight": 4 },
+      { "from": "LXGWWenKai-Medium\\.ttf", "weight": 5 }
+    ]
+  }
+}
+```
 
-## 字重测试
- 
-[点击此处进入字重测试](https://font.yukonga.top/)，[@YuKongA](https://github.com/YuKongA/)（酷安 [@YuKong_A](http://www.coolapk.com/u/27385711)）制作提供。
+## config.json 字段说明
 
-## 注意事项
+### 顶层字段
 
-### 模块文件说明
+| 字段 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| `slug` | ✅ | 唯一标识，也是发布 tag 的前缀（`slug-版本`） |
+| `name` | ✅ | 显示名，写入 `module.prop` 的 `name` 与 Release 标题 |
+| `module_id` | ✅ | Magisk 模块 id，只能含字母、数字、`_`、`.`、`-` |
+| `upstream` | ✅ | 上游仓库 `owner/repo`，用于取 `latest release` |
+| `format` | ✅ | `ttf` 或 `otf`，声明字体文件格式 |
+| `version_code` | ❌ | 默认 `digits`。从上游 tag 提取数字版 `versionCode` 的规则：`digits` 表示只保留数字；也可填一个含捕获组的正则，取第 1 组 |
+| `fallback` | ❌ | 默认 `nearest`。字重回退策略，目前仅支持 `nearest` |
+| `cjk_langs` | ❌ | 默认 `["zh-Hans", "zh-Hant,zh-Bopo", "ja", "ko"]`。生成的字体的语言标签列表（每个元素对应一个 `<family lang="...">`） |
 
-1. **EmptyFont（空壳字体）**：位于 `/system/fonts` 目录内，为 Android 默认西文字体 Roboto 的空壳字体，主要用于提供字体度量和字重信息，**请勿删除**。
+### license
 
-2. **Google Sans 覆盖**：`/system/product` 文件夹用于覆盖类原生 Android 系统内置的 Google Sans 字体，以实现所替换字体在类原生 ROM 上的全局覆盖。
-   - **如需保留原生的 Google Sans 字体**，请将模块内的 `/system/product` 文件夹删除。
-   - 当前版本采用空字体替换 Google Sans 的方式实现屏蔽，若遇到兼容性问题可尝试此调整。
+| 字段 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| `type` | ✅ | 许可证名，写入 `module.prop` 的 `description` |
+| `assets` | ✅ | 上游仓库内的许可证文件路径数组，逐一打包进模块根目录 |
 
-3. **字体配置文件**：`/system/etc/fonts.xml` 为字体配置文件，已预先调整以调用空字体及自定义字体。
-   - 经测试，该配置在 **Android 11 和 Android 12** 的部分 ROM 上可正常工作（测试机型：Redmi Note 5 / Pixel Experience 12.0；Redmi K20 Pro / crDroid 7.9）。
-   - **但不保证所有 ROM 均能正常使用**，不同 ROM 调用字体的配置文件可能有所不同，请参阅下方 **「兼容性调整」** 章节。
+### download
 
-### 制作与使用建议
+| 字段 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| `kind` | ✅ | `assets`（直接下载 release 资产）或 `archive`（下载归档后解包） |
+| `entries` | ✅ | 字体条目数组，每个元素 `{ "from": 正则, "weight": 1..9 }`。`from` 匹配资产名或归档内文件名（正则，注意转义 `.`） |
+| `asset` | archive 时必填 | 匹配归档资产名的正则（如 `^SarasaGothic-TTF-[0-9.]+\\.7z$`） |
+| `archive_format` | archive 时必填 | `zip` 或 `7z` |
 
-4. **字体搭配注意**：添加字体时请留意各种语言字体的字重对应。
-   - 若 CJK 字体已同时包含中文和韩文字形，则无需再单独添加韩文字体。
-   - 若中文字体自带的西文字形已满足需求，则无需再单独添加英文字体。
+### 字重（weight）
 
-5. **最低 Magisk 版本要求**：本模板最低支持 **Magisk 20.4**。
+`entries[].weight` 取值 1–9，安装时由 `fontgen` 展开为最接近的 100–900 字重（平手取较细）：
 
-### ROOT 隐藏兼容性（针对 Android 12+）
+| weight | 字重 | weight | 字重 |
+| ------ | ---- | ------ | ---- |
+| 1 | Thin (100) | 6 | SemiBold (600) |
+| 2 | UltraLight (200) | 7 | Bold (700) |
+| 3 | Light (300) | 8 | ExtraBold (800) |
+| 4 | Regular (400) | 9 | Heavy/Black (900) |
+| 5 | Medium (500) | | |
 
-6. 如需在 Android 12 及以上系统隐藏 ROOT 的同时使用字体模块，建议：
-   - 使用 **Magisk 24.0+**，开启 Zygisk；
-   - 配合 **Shamiko 0.2.0+**；
-   - 在 Magisk 设置中取消勾选「遵守排除列表」，防止排除列表内的应用闪退。
-   - **注意：** 请勿在已使用旧版 Magisk Hide 的 Android 12 系统上刷入本模板制作的字体模块，以免引发兼容性问题。
+## 手动触发与本地构建
 
-### KernelSU / APatch 兼容性
+- **手动触发**：Actions → “Build CJK Font Modules” → Run workflow，可填逗号分隔的 slug 只重建部分字体（留空=全部）。
+- **本地试跑**：`DRY_RUN=1 bash .github/scripts/build_fonts.sh .github/fonts/lxgw-wenkai/config.json`，只构建不发布（需本机装有 `gh`、`jq`、`curl`、`zip`、`unzip`，处理 7z 时还需 `p7zip-full`）。
 
-本模板基于 Magisk 开发，在 KernelSU 和 APatch 上**未经充分测试**，请谨慎使用。
+## fontgen 子项目
 
-- **KernelSU**：大多数 Magisk 模块可正常工作，但其模块系统与 Magisk **不能共存**（启用 KernelSU 模块后 Magisk 将失效）。KernelSU 不支持 Zygisk，需安装 ZygiskNext。
-- **APatch**：模块机制与 Magisk 高度相似，多数模块可直接使用。
+安装期配置生成器是一个独立的 Go 项目：[`byte-me-labs/magisk-module-fontgen`](https://github.com/byte-me-labs/magisk-module-fontgen)。构建期从它的 latest release 拉取 `fontgen-{arm64,arm,x64}` 三个静态二进制。选 Go 的原因：
 
-如遇问题，请参考 [KernelSU 常见问题](https://kernelsu.org/zh_CN/guide/faq.html) 或 [APatch 文档](https://github.com/bmax121/APatch) 自行排查。
+- 需要**字节级定位 + 拼接**（保留原厂 XML 的注释、缩进、未识别属性），shell/awk 对单行压缩的 XML 力不从心；
+- 编译为无依赖的静态 Linux 二进制（`GOOS=linux`），在 Android 内核上直接运行，无需 NDK/解释器；
+- 有单元测试 + golden 文件锁死行为，适合长期维护。
 
-## 兼容性调整 <sub>仅供参考</sub>
+它读取 `fontgen.json`（构建期生成，含 `cjk_langs` 与原始字重 → 实际文件名映射），在安装时完成字重展开与 XML 拼接。
 
->[!WARNING]
-> 以下兼容性调整方法基于过往用户反馈整理，部分信息可能已过时，仅供参考，不保证在所有系统版本上有效。
+## 致谢
 
->[!CAUTION]
-> **Android 15 及以上版本的原生/类原生 OS 特别注意：** 根据 Android 官方变更，`fonts.xml` 已被弃用，相关配置需改写到 `font_fallback.xml` 中。请参考[最新 Android 开发者文档](https://source.android.com/docs/core/fonts/custom-font-fallback?hl=zh-cn)调整模块配置。
-
-为了使该模块模板更加适合您的手机，需要对模块模板内的配置文件进行调整：
-
-- **OPPO/一加 ColorOS 13 及以下版本：** 将 `/system/etc/fonts.xml` 复制到 `/system/system_ext/etc/` *（若无该文件夹请先创建）* 目录并重命名为 `fonts_base.xml`。
-- **OPPO/一加 ColorOS 14 版本：** 将 `/system/etc/fonts.xml` 复制两份到 `/system/system_ext/etc/` *（若无该文件夹请先创建）* 目录并重命名为 `fonts_base.xml` 及 `fonts_ule.xml`。
-- **一加 HydrogenOS 11 及以上版本：** 将 `/system/etc/fonts.xml` 复制到相同文件夹，并重命名为 `fonts_base.xml。`
-- **魅族 Flyme：** 将 `/system/etc/fonts.xml` 复制 3 份到相同文件夹，并重命名为以下 3 个文件： `fonts_flyme.xml`、`fonts_inter.xml` 和 `fonts_slate.xml`。
-- **小米 MIUI 12.5：** 需刷入 [空字体模块 v4.4](https://yukonga.lanzoub.com/iSxAP07pu05i) / [v4.1](https://wwi.lanzoui.com/iEDyZt6a83g)，或者选用 [MIUI 字体全局修复模块](https://apk.magisk.vip/app.php?id=792)。
-- LG 手机的兼容性调整请参阅： https://github.com/lxgw/advanced-cjk-font-magisk-module-template/issues/2
-- 如有其他设备的兼容性调整，请在 issue 提出。
-- **已有用户测试，本模块模板不适用于 vivo/IQOO 手机。**
-
-## 字体模块模板作者
-
-基于 [Petit-Abba](https://github.com/Petit-Abba)（酷安 [@Kotch / 原名「阿巴酱」](https://www.coolapk.com/u/1132618)） 的 [Magisk-Modules-Template-ge20.4](https://github.com/Petit-Abba/Magisk-Modules-Template-ge20.4) 制作。
-
-- **Telegram：** @lxgwtg
-- **微信公众号：** 霞鹜 *（ID: lxgwshare）*
-- **酷安：** [@落霞孤鹜lxgw](https://www.coolapk.com/u/633884)
-- **微博：** [@孤鹜先森](https://weibo.com/6624339726)
+本仓库骨架源自 [lxgw/advanced-cjk-font-magisk-module-template](https://github.com/lxgw/advanced-cjk-font-magisk-module-template)（作者 [@落霞孤鹜lxgw](https://github.com/lxgw)），后者基于 [Petit-Abba/Magisk-Modules-Template-ge20.4](https://github.com/Petit-Abba/Magisk-Modules-Template-ge20.4)。感谢他们为字体模块模板做出的贡献。
 
 ## 许可证
 
-本项目整体采用 [MIT License](./LICENSE) 开源发布。
-
-### 字体配置文件许可证
-
-`/system/etc/fonts.xml` 文件基于 [Android 开源项目 (AOSP)](https://source.android.com/) 的配置文件修改而来，原始文件遵循 **Apache License 2.0**。修改部分同样遵循 Apache License 2.0，并按 Apache License 2.0 的要求，在文件头部添加了原始版权声明。
+本项目整体采用 [MIT License](./LICENSE) 开源发布。各字体模块随包附带的字体文件与其许可证均来自各自上游仓库，版权归原作者所有，请遵守其授权条款。

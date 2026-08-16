@@ -9,9 +9,9 @@
 #   1. 用 gh api 取上游 latest release 的 tag_name 作为版本号；
 #   2. 若为定时触发（SKIP_PUBLISHED=true）且本仓库已存在 "slug-tag" 这个 tag 则跳过；
 #      手动触发（workflow_dispatch）时 SKIP_PUBLISHED=false，强制重建并重新发布；
-#   3. 下载字体（保留上游原始文件名）、组装模块、生成字重映射文件 font_map.txt、
-#      写入 module.prop、携带许可证、打包 zip；fonts.xml 与 font_fallback.xml 不在
-#      构建期生成，而是由 customize.sh 在安装时读取设备原厂配置、替换 CJK 族动态生成；
+#   3. 下载字体（保留上游原始文件名）、下载 fontgen 二进制（三架构）、生成 fontgen.json、
+#      写入 module.prop、携带许可证、打包 zip；fonts.xml 与 font_fallback.xml 不在构建期
+#      生成，而是由 customize.sh 在安装时调用 fontgen 读取原厂配置、插入 CJK 族动态生成；
 #   4. 产物写到 dist/ 并输出发布信息，由工作流的 softprops/action-gh-release
 #      步骤创建 Release 并上传 zip。
 #
@@ -34,7 +34,7 @@ SKIP_PUBLISHED="${SKIP_PUBLISHED:-true}"
 
 # 模板骨架：整目录复制（META-INF 为顶层目录）+ 单文件复制（模块根目录的脚本/配置）。
 # system/ 不再作为静态骨架复制：字体文件运行时组装进 system/fonts/，
-# fonts.xml 与 font_fallback.xml 由 customize.sh 在安装时根据设备原厂配置动态生成。
+# fonts.xml 与 font_fallback.xml 由 customize.sh 在安装时调用 fontgen 动态生成。
 SKELETON_DIRS=(META-INF)
 SKELETON_FILES=(customize.sh post-fs-data.sh service.sh uninstall.sh sepolicy.rule system.prop)
 
@@ -158,18 +158,6 @@ else
   done < <(jq -c '.download.entries[]' <<<"$font")
 fi
 
-# 给定目标字重（100..900），从已下载字体的字重集合里取最接近的文件路径（平手取较细者）
-nearest_file() {
-  local target="$1" best="" bd=99 w d
-  local want=$((target / 100))
-  for w in 1 2 3 4 5 6 7 8 9; do
-    [[ -n "${weights[$w]:-}" ]] || continue
-    d=$((w - want)); ((d < 0)) && d=$((-d))
-    if ((d < bd)); then bd=$d; best=$w; fi
-  done
-  printf '%s' "${weights[$best]}"
-}
-
 # 组装模块目录
 mod="$work/$slug"; mkdir -p "$mod"
 for d in "${SKELETON_DIRS[@]}"; do cp -a "$ROOT/$d" "$mod/"; done
@@ -179,13 +167,33 @@ for f in "${SKELETON_FILES[@]}"; do cp -a "$ROOT/$f" "$mod/"; done
 fontsdir="$mod/system/fonts"; mkdir -p "$fontsdir"
 for f in "${weights[@]}"; do cp "$f" "$fontsdir/"; done
 
-# 生成字重映射文件 font_map.txt（字重 100..900 -> 字体文件名，按最接近字重取文件），
-# 供 customize.sh 在安装时读取设备原厂 fonts.xml / font_fallback.xml 并替换 CJK 族。
-: > "$mod/font_map.txt"
-for w in 100 200 300 400 500 600 700 800 900; do
-  f="$(nearest_file "$w")"
-  printf '%s %s\n' "$w" "$(basename "$f")" >> "$mod/font_map.txt"
+# 下载 fontgen 二进制（三个架构），安装时由 customize.sh 按 ABI 挑选调用。
+# 依赖 fontgen 仓库（byte-me-labs/magisk-module-fontgen）已发布 release。
+FONTGEN_REPO="byte-me-labs/magisk-module-fontgen"
+for arch in arm64 arm x64; do
+  asset="fontgen-$arch"
+  url="$(gh api "repos/$FONTGEN_REPO/releases/latest" \
+    --jq ".assets[] | select(.name==\"$asset\") | .browser_download_url" 2>/dev/null || true)"
+  [ -n "$url" ] || { warn "fontgen latest release 缺少资产 $asset"; exit 1; }
+  mkdir -p "$mod/bin/$arch"
+  curl -fsSL -o "$mod/bin/$arch/fontgen" "$url"
+  chmod +x "$mod/bin/$arch/fontgen"
 done
+
+# 生成 fontgen.json（原始字重 -> 实际文件名），取代旧的 font_map.txt；字重 100..900
+# 的最接近展开由 fontgen 在安装时完成。cjk_langs 从 config.json 读取，缺省用标准清单。
+cjk_langs="$(jq -c '.cjk_langs // ["zh-Hans","zh-Hant,zh-Bopo","ja","ko"]' "$CFG_FILE")"
+{
+  printf '{"version":1,"cjk_langs":%s,"fonts":[' "$cjk_langs"
+  first=1
+  for w in 1 2 3 4 5 6 7 8 9; do
+    [[ -n "${weights[$w]:-}" ]] || continue
+    [[ $first -eq 1 ]] || printf ','
+    printf '{"weight":%d,"file":"%s"}' "$w" "$(basename "${weights[$w]}")"
+    first=0
+  done
+  printf ']}'
+} > "$mod/fontgen.json"
 
 # 许可证
 while IFS= read -r lic; do
