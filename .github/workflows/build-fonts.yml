@@ -27,9 +27,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FILTER: ${{ github.event.inputs.fonts || '' }}
+          # 仅定时（schedule）触发时跳过已发布版本；手动触发（workflow_dispatch）强制重建
+          SKIP_PUBLISHED: ${{ github.event_name == 'schedule' }}
         run: |
           shopt -s nullglob
-          files=(.github/fonts/*.json)
+          files=(.github/fonts/*/config.json)
 
           # 校验每个配置文件的 schema；任一无效即 fail-fast（带文件名标注）
           for f in "${files[@]}"; do
@@ -67,11 +69,11 @@ jobs:
               [[ "$hit" == true ]] || continue
             fi
 
-            # 查重：上游最新版本是否已发布过
+            # 查重（仅 schedule）：上游最新版本是否已发布过
             upstream="$(jq -r .upstream "$f")"
             tag="$(gh api "repos/$upstream/releases/latest" --jq '.tag_name')" \
               || { echo "::error file=$f::无法获取上游 $upstream 的 latest release" >&2; exit 1; }
-            if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$slug-$tag" >/dev/null 2>&1; then
+            if [[ "$SKIP_PUBLISHED" == "true" ]] && gh api "repos/$GITHUB_REPOSITORY/releases/tags/$slug-$tag" >/dev/null 2>&1; then
               echo "跳过（已发布）：$slug $tag"
               continue
             fi
@@ -102,6 +104,7 @@ jobs:
         name: 构建 ${{ matrix.slug }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_PUBLISHED: ${{ github.event_name == 'schedule' }}
         run: bash .github/scripts/build_fonts.sh "${{ matrix.config }}"
 
       - name: 发布 ${{ matrix.slug }}

@@ -3,14 +3,15 @@
 #
 # 用法：build_fonts.sh <字体配置.json>
 # 由工作流的矩阵（strategy.matrix）为每个字体各起一个作业调用本脚本，
-# 配置文件位于 .github/fonts/<slug>.json，本脚本只处理那一个字体。
+# 配置文件位于 .github/fonts/<slug>/config.json，本脚本只处理那一个字体。
 #
 # 流程：
 #   1. 用 gh api 取上游 latest release 的 tag_name 作为版本号；
-#   2. 若本仓库已存在 "slug-tag" 这个 tag 则跳过（幂等）；
-#   3. 下载字体、按模板命名规则改名为 fontchw1..9、组装模块、
-#      生成 font_fallback.xml（Android 15+）、写入 module.prop、
-#      携带许可证、打包 zip；
+#   2. 若为定时触发（SKIP_PUBLISHED=true）且本仓库已存在 "slug-tag" 这个 tag 则跳过；
+#      手动触发（workflow_dispatch）时 SKIP_PUBLISHED=false，强制重建并重新发布；
+#   3. 下载字体（保留上游原始文件名）、组装模块、从 .github/fonts/<slug>/fonts.xml 与
+#      .github/fonts/<slug>/font_fallback.xml 拷贝预设字体配置（无需运行时改名）、
+#      写入 module.prop、携带许可证、打包 zip；
 #   4. 产物写到 dist/ 并输出发布信息，由工作流的 softprops/action-gh-release
 #      步骤创建 Release 并上传 zip。
 #
@@ -28,6 +29,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CFG_FILE="${1:?用法: $0 <字体配置.json>}"
 [[ "$CFG_FILE" == /* ]] || CFG_FILE="$ROOT/$CFG_FILE"
 DRY_RUN="${DRY_RUN:-}"
+# 定时触发时跳过已发布版本；手动触发时强制重建（默认 true，仅在未显式传入时兜底）
+SKIP_PUBLISHED="${SKIP_PUBLISHED:-true}"
 
 # 模板骨架：整目录复制（META-INF、system 为顶层目录，复制整棵子树以保留嵌套结构）
 #   + 单文件复制（模块根目录的脚本/配置）
@@ -96,16 +99,14 @@ slug="$(jq -r .slug <<<"$font")"
 name="$(jq -r .name <<<"$font")"
 module_id="$(jq -r .module_id <<<"$font")"
 upstream="$(jq -r .upstream <<<"$font")"
-ext="$(jq -r .format <<<"$font")"
 lic_type="$(jq -r .license.type <<<"$font")"
 kind="$(jq -r .download.kind <<<"$font")"
 vercode="$(jq -r '.version_code // "digits"' <<<"$font")"
-fallback="$(jq -r '.fallback // "nearest"' <<<"$font")"
 
 tag="$(gh api "repos/$upstream/releases/latest" --jq '.tag_name')"
 release_tag="$slug-$tag"
 
-if gh api "repos/$REPO/releases/tags/$release_tag" >/dev/null 2>&1; then
+if [[ "$SKIP_PUBLISHED" == "true" ]] && gh api "repos/$REPO/releases/tags/$release_tag" >/dev/null 2>&1; then
   info "$slug" "$tag 已发布，跳过"
   [[ -n "${GITHUB_OUTPUT:-}" ]] && echo "should_publish=false" >> "$GITHUB_OUTPUT"
   exit 0
@@ -156,58 +157,23 @@ else
   done < <(jq -c '.download.entries[]' <<<"$font")
 fi
 
-# 字重回填策略（目前只支持 nearest：缺失槽位取最近字重）
-if [[ "$fallback" != "nearest" ]]; then
-  warn "$slug 不支持的字重回填策略 '$fallback'（只支持 nearest）"
-  exit 1
-fi
-
-# 邻近回填：slot 1..9 -> 源文件
-mapfile -t provided < <(printf '%s\n' "${!weights[@]}" | sort -n)
-declare -A slot_path
-for s in $(seq 1 9); do
-  best=0; bestd=999
-  for w in "${provided[@]}"; do
-    d=$(( s > w ? s - w : w - s ))
-    if (( d < bestd )); then bestd=$d; best=$w; fi
-  done
-  slot_path[$s]="${weights[$best]}"
-done
-
 # 组装模块目录
 mod="$work/$slug"; mkdir -p "$mod"
 for d in "${SKELETON_DIRS[@]}"; do cp -a "$ROOT/$d" "$mod/"; done
 for f in "${SKELETON_FILES[@]}"; do cp -a "$ROOT/$f" "$mod/"; done
 
 fontsdir="$mod/system/fonts"
-for s in $(seq 1 9); do cp "${slot_path[$s]}" "$fontsdir/fontchw$s.$ext"; done
+# 字体文件保留上游原始文件名，预设的 fonts.xml / font_fallback.xml 直接引用这些名字
+for f in "${weights[@]}"; do cp "$f" "$fontsdir/"; done
 
-# 语言槽折叠（en/ei/kr/jp -> ch），OTF 时再改扩展名
-sed -i -e 's/fontenw/fontchw/g' -e 's/fonteiw/fontchw/g' \
-       -e 's/fontkrw/fontchw/g' -e 's/fontjpw/fontchw/g' "$mod/system/etc/fonts.xml"
-[[ "$ext" == "otf" ]] && sed -i -E 's/(fontchw[0-9])\.ttf/\1.otf/g' "$mod/system/etc/fonts.xml"
-
-# 生成 font_fallback.xml（Android 15+）
-{
-  echo '<?xml version="1.0" encoding="utf-8"?>'
-  echo '<familyset>'
-  echo '    <family>'
-  for s in $(seq 1 9); do
-    printf '        <font weight="%d" style="normal">fontchw%d.%s</font>\n' "$((s * 100))" "$s" "$ext"
-  done
-  for s in $(seq 1 9); do
-    printf '        <font weight="%d" style="italic">fontchw%d.%s</font>\n' "$((s * 100))" "$s" "$ext"
-  done
-  echo '    </family>'
-  for lang in zh-Hans zh-Hant ja ko; do
-    printf '    <family lang="%s">\n' "$lang"
-    for s in $(seq 1 9); do
-      printf '        <font weight="%d" style="normal">fontchw%d.%s</font>\n' "$((s * 100))" "$s" "$ext"
-    done
-    echo '    </family>'
-  done
-  echo '</familyset>'
-} > "$mod/system/etc/font_fallback.xml"
+# 拷贝预设字体配置（去重后的最终引用已预先写好，无需运行时改名）
+preset_dir="$ROOT/.github/fonts/$slug"
+preset_fonts="$preset_dir/fonts.xml"
+preset_fallback="$preset_dir/font_fallback.xml"
+[[ -f "$preset_fonts" ]] || { warn "$slug 缺少预设 $preset_fonts"; exit 1; }
+[[ -f "$preset_fallback" ]] || { warn "$slug 缺少预设 $preset_fallback"; exit 1; }
+cp "$preset_fonts" "$mod/system/etc/fonts.xml"
+cp "$preset_fallback" "$mod/system/etc/font_fallback.xml"
 
 # 许可证
 while IFS= read -r lic; do
