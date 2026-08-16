@@ -43,13 +43,16 @@ warn() { printf '\033[1;33m[警告]\033[0m %s\n' "$*" >&2; }
 
 # 获取上游最新 release 的 JSON 对象。优先 releases/latest（只含正式版）；
 # 若上游仅发布 prerelease（releases/latest 返回 404），回退到列表第一条（含 prerelease）。
+# 用 if 判断 gh 的退出码而非 stdout 内容：gh api 在 404 时会把错误体写到 stdout。
 fetch_release() {
   local repo="$1" out
   if out="$(gh api "repos/$repo/releases/latest" 2>/dev/null)"; then
     printf '%s' "$out"
     return 0
   fi
-  gh api "repos/$repo/releases?per_page=1" --jq '.[0] | select(. != null)'
+  # 回退：release 列表按创建时间倒序，第一条即最新（含 prerelease，不含 draft）。
+  # || true 保证回退也失败时（如网络/限流）返回空而非触发 set -e。
+  gh api "repos/$repo/releases?per_page=1" --jq '.[0] | select(. != null)' 2>/dev/null || true
 }
 
 # 从 release 资产里按正则找到唯一匹配，输出 browser_download_url；0/多匹配返回非零。
