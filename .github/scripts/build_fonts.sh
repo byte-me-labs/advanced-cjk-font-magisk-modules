@@ -206,7 +206,7 @@ done < <(jq -r '.license.assets[]' <<<"$font")
   echo "name=$name"
   echo "version=$tag"
   echo "versionCode=$(version_code "$tag" "$vercode")"
-  echo "author=auto-built (upstream: $upstream)"
+  echo "author=byte-me-labs (upstream: $upstream)"
   echo "description=$name $tag，自动打包自 $upstream。许可证：$lic_type。"
 } > "$mod/module.prop"
 
