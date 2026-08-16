@@ -1,0 +1,23 @@
+{
+  "slug": "source-han-sans",
+  "name": "思源黑体 Source Han Sans",
+  "module_id": "fonttemplate-source-han-sans",
+  "upstream": "adobe-fonts/source-han-sans",
+  "format": "otf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["LICENSE.txt"] },
+  "download": {
+    "kind": "archive",
+    "asset": "_SourceHanSansSC\\.zip",
+    "archive_format": "zip",
+    "entries": [
+      { "from": "SourceHanSansSC-ExtraLight\\.otf", "weight": 2 },
+      { "from": "SourceHanSansSC-Light\\.otf", "weight": 3 },
+      { "from": "SourceHanSansSC-Regular\\.otf", "weight": 4 },
+      { "from": "SourceHanSansSC-Medium\\.otf", "weight": 5 },
+      { "from": "SourceHanSansSC-Bold\\.otf", "weight": 7 },
+      { "from": "SourceHanSansSC-Heavy\\.otf", "weight": 9 }
+    ]
+  }
+}

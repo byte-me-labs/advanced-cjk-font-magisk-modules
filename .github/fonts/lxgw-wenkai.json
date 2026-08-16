@@ -1,0 +1,18 @@
+{
+  "slug": "lxgw-wenkai",
+  "name": "霞鹜文楷 LXGW WenKai",
+  "module_id": "fonttemplate-lxgw-wenkai",
+  "upstream": "lxgw/LxgwWenKai",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "LXGWWenKai-Light\\.ttf", "weight": 3 },
+      { "from": "LXGWWenKai-Regular\\.ttf", "weight": 4 },
+      { "from": "LXGWWenKai-Medium\\.ttf", "weight": 5 }
+    ]
+  }
+}

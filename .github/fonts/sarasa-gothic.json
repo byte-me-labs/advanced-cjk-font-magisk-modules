@@ -1,0 +1,22 @@
+{
+  "slug": "sarasa-gothic",
+  "name": "更纱黑体 Sarasa Gothic",
+  "module_id": "fonttemplate-sarasa-gothic",
+  "upstream": "be5invis/Sarasa-Gothic",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["LICENSE"] },
+  "download": {
+    "kind": "archive",
+    "asset": "^SarasaGothic-TTF-[0-9.]+\\.7z$",
+    "archive_format": "7z",
+    "entries": [
+      { "from": "sarasa-gothic-extralight\\.ttf", "weight": 2 },
+      { "from": "sarasa-gothic-light\\.ttf", "weight": 3 },
+      { "from": "sarasa-gothic-regular\\.ttf", "weight": 4 },
+      { "from": "sarasa-gothic-semibold\\.ttf", "weight": 6 },
+      { "from": "sarasa-gothic-bold\\.ttf", "weight": 7 }
+    ]
+  }
+}

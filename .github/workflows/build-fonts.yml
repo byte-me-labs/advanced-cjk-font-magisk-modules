@@ -1,0 +1,116 @@
+name: Build CJK Font Modules
+
+on:
+  schedule:
+    # 每天 03:17 UTC（避开整点高峰）
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      fonts:
+        description: '逗号分隔的 slug（留空=全部），如 lxgw-wenkai,sarasa-gothic'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  # 校验配置、过滤、查重，产出需要构建的字体矩阵（每个字体一行）
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      include: ${{ steps.gen.outputs.include }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gen
+        name: 校验配置、查重并生成构建矩阵
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILTER: ${{ github.event.inputs.fonts || '' }}
+        run: |
+          shopt -s nullglob
+          files=(.github/fonts/*.json)
+
+          # 校验每个配置文件的 schema；任一无效即 fail-fast（带文件名标注）
+          for f in "${files[@]}"; do
+            jq -e '
+              (.slug | type == "string" and length > 0)
+              and (.name | type == "string" and length > 0)
+              and (.module_id | type == "string" and length > 0)
+              and (.upstream | type == "string" and length > 0)
+              and (.format == "ttf" or .format == "otf")
+              and (.license.assets | type == "array" and length > 0)
+              and (.download.kind == "assets" or .download.kind == "archive")
+              and (.download.entries | type == "array" and length > 0)
+              and ([.download.entries[] |
+                     (.from | type == "string" and length > 0)
+                     and (.weight | type == "number" and . >= 1 and . <= 9)] | all)
+              and (if .download.kind == "archive"
+                     then (.download.asset | type == "string" and length > 0)
+                          and (.download.archive_format == "zip" or .download.archive_format == "7z")
+                     else true end)
+              and ((.fallback // "nearest") == "nearest")
+              and ((.version_code // "digits") == "digits")
+            ' "$f" >/dev/null || { echo "::error file=$f::配置文件校验失败" >&2; exit 1; }
+          done
+
+          # 过滤（FONT_FILTER）+ 查重（release 已存在则不进矩阵）
+          IFS=',' read -ra WANT <<< "$FILTER"
+          rows=()
+          for f in "${files[@]}"; do
+            slug="$(jq -r .slug "$f")"
+
+            # FONT_FILTER 精确匹配
+            if [[ ${#WANT[@]} -gt 0 ]]; then
+              hit=false
+              for x in "${WANT[@]}"; do [[ "$x" == "$slug" ]] && hit=true; done
+              [[ "$hit" == true ]] || continue
+            fi
+
+            # 查重：上游最新版本是否已发布过
+            upstream="$(jq -r .upstream "$f")"
+            tag="$(gh api "repos/$upstream/releases/latest" --jq '.tag_name')" \
+              || { echo "::error file=$f::无法获取上游 $upstream 的 latest release" >&2; exit 1; }
+            if gh api "repos/$GITHUB_REPOSITORY/releases/tags/$slug-$tag" >/dev/null 2>&1; then
+              echo "跳过（已发布）：$slug $tag"
+              continue
+            fi
+            echo "待构建：$slug $tag"
+            rows+=("$(jq -c --arg path "$f" '{slug: .slug, config: $path}' "$f")")
+          done
+
+          include="[$(IFS=','; echo "${rows[*]}")]"
+          echo "矩阵：$include"
+          echo "include=$include" >> "$GITHUB_OUTPUT"
+
+  # 每个字体一个作业，并行构建并发布；fail-fast: false 保证互不影响
+  build:
+    needs: matrix
+    if: needs.matrix.outputs.include != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.matrix.outputs.include) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 p7zip（更纱黑体的 .7z 归档需要）
+        run: sudo apt-get update && sudo apt-get install -y p7zip-full
+
+      - id: build
+        name: 构建 ${{ matrix.slug }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash .github/scripts/build_fonts.sh "${{ matrix.config }}"
+
+      - name: 发布 ${{ matrix.slug }}
+        if: steps.build.outputs.should_publish == 'true'
+        uses: softprops/action-gh-release@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ steps.build.outputs.release_tag }}
+          name: ${{ steps.build.outputs.title }}
+          body: ${{ steps.build.outputs.notes }}
+          files: dist/*.zip
+          fail_on_unmatched_files: true

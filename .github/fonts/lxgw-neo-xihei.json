@@ -1,0 +1,16 @@
+{
+  "slug": "lxgw-neo-xihei",
+  "name": "霞鹜新晰黑 LXGW Neo XiHei",
+  "module_id": "fonttemplate-lxgw-neo-xihei",
+  "upstream": "lxgw/LxgwNeoXiHei",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "IPA Font License 1.0", "assets": ["LICENSE.md"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "LXGWNeoXiHei\\.ttf", "weight": 4 }
+    ]
+  }
+}
