@@ -1,0 +1,18 @@
+{
+  "slug": "zhuque",
+  "name": "朱雀仿宋 Zhuque Fangsong",
+  "module_id": "fonttemplate-zhuque",
+  "upstream": "TrionesType/zhuque",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["LICENSE.txt"] },
+  "download": {
+    "kind": "archive",
+    "asset": "^ZhuqueFangsong-v[0-9.]+\\.zip$",
+    "archive_format": "zip",
+    "entries": [
+      { "from": "^ZhuqueFangsong-Regular\\.ttf$", "weight": 4 }
+    ]
+  }
+}

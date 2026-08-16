@@ -1,0 +1,18 @@
+{
+  "slug": "smiley-sans",
+  "name": "得意黑 Smiley Sans",
+  "module_id": "fonttemplate-smiley-sans",
+  "upstream": "atelier-anchor/smiley-sans",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["LICENSE"] },
+  "download": {
+    "kind": "archive",
+    "asset": "^smiley-sans-v[0-9.]+\\.zip$",
+    "archive_format": "zip",
+    "entries": [
+      { "from": "^SmileySans-Oblique\\.ttf$", "weight": 4 }
+    ]
+  }
+}

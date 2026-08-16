@@ -1,0 +1,24 @@
+{
+  "slug": "dream-han-sans",
+  "name": "梦源黑体 Dream Han Sans",
+  "module_id": "fonttemplate-dream-han-sans",
+  "upstream": "Pal3love/dream-han-cjk",
+  "format": "ttf",
+  "version_code": "sans-([0-9.]+)",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["LICENSE.txt"] },
+  "download": {
+    "kind": "archive",
+    "asset": "^DreamHanSansCN\\.zip$",
+    "archive_format": "zip",
+    "entries": [
+      { "from": "^DreamHanSansCN-W3\\.ttf$", "weight": 3 },
+      { "from": "^DreamHanSansCN-W8\\.ttf$", "weight": 4 },
+      { "from": "^DreamHanSansCN-W12\\.ttf$", "weight": 5 },
+      { "from": "^DreamHanSansCN-W17\\.ttf$", "weight": 6 },
+      { "from": "^DreamHanSansCN-W20\\.ttf$", "weight": 7 },
+      { "from": "^DreamHanSansCN-W24\\.ttf$", "weight": 8 },
+      { "from": "^DreamHanSansCN-W27\\.ttf$", "weight": 9 }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "slug": "975yuan",
+  "name": "975圆体 LXGW 975Yuan",
+  "module_id": "fonttemplate-975yuan",
+  "upstream": "lxgw/975Yuan",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "^LXGW975YuanSC-400W\\.ttf$", "weight": 4 },
+      { "from": "^LXGW975YuanSC-500W\\.ttf$", "weight": 5 },
+      { "from": "^LXGW975YuanSC-700W\\.ttf$", "weight": 7 }
+    ]
+  }
+}

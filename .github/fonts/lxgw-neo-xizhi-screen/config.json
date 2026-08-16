@@ -1,0 +1,16 @@
+{
+  "slug": "lxgw-neo-xizhi-screen",
+  "name": "霞鹜新晰黑屏幕版 LXGW Neo XiHei Screen",
+  "module_id": "fonttemplate-lxgw-neo-xizhi-screen",
+  "upstream": "lxgw/LxgwNeoXiZhi-Screen",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "IPA Font License 1.0", "assets": ["IPA_Font_License_Agreement_v1.0.txt", "licenses_of_other_incorporated_fonts.txt"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "^LXGWNeoXiHeiScreen\\.ttf$", "weight": 4 }
+    ]
+  }
+}

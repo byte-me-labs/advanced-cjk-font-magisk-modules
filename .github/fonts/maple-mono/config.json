@@ -1,0 +1,25 @@
+{
+  "slug": "maple-mono",
+  "name": "枫叶等宽 Maple Mono",
+  "module_id": "fonttemplate-maple-mono",
+  "upstream": "subframe7536/maple-font",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "archive",
+    "asset": "^MapleMono-CN\\.zip$",
+    "archive_format": "zip",
+    "entries": [
+      { "from": "^MapleMono-CN-Thin\\.ttf$", "weight": 1 },
+      { "from": "^MapleMono-CN-ExtraLight\\.ttf$", "weight": 2 },
+      { "from": "^MapleMono-CN-Light\\.ttf$", "weight": 3 },
+      { "from": "^MapleMono-CN-Regular\\.ttf$", "weight": 4 },
+      { "from": "^MapleMono-CN-Medium\\.ttf$", "weight": 5 },
+      { "from": "^MapleMono-CN-SemiBold\\.ttf$", "weight": 6 },
+      { "from": "^MapleMono-CN-Bold\\.ttf$", "weight": 7 },
+      { "from": "^MapleMono-CN-ExtraBold\\.ttf$", "weight": 8 }
+    ]
+  }
+}

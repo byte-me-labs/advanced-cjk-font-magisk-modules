@@ -1,0 +1,16 @@
+{
+  "slug": "lxgw-wenkai-screen",
+  "name": "霞鹜文楷屏幕版 LXGW WenKai Screen",
+  "module_id": "fonttemplate-lxgw-wenkai-screen",
+  "upstream": "lxgw/LxgwWenKai-Screen",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "^LXGWWenKaiScreen\\.ttf$", "weight": 4 }
+    ]
+  }
+}

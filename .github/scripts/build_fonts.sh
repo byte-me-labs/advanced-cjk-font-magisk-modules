@@ -64,10 +64,13 @@ pick_url() {
 }
 
 # 在解压目录里按正则找到唯一文件，输出其完整路径。依赖全局变量 EXTRACT_DIR。
+# 匹配目标为「相对解压目录的路径」，故正则既可只写文件名（兼容旧配置），
+# 也可写子目录前缀来区分同名文件（如 zip 内 fonts/ttf/ 与 fonts/gf/ 同名的情况）。
 pick_file() {
-  local pattern="$1" f found="" count=0
+  local pattern="$1" f rel found="" count=0
   while IFS= read -r f; do
-    if [[ "$(basename "$f")" =~ $pattern ]]; then
+    rel="${f#"$EXTRACT_DIR"/}"
+    if [[ "$rel" =~ $pattern ]]; then
       found="$f"; count=$((count + 1))
     fi
   done < <(find "$EXTRACT_DIR" -type f)

@@ -1,0 +1,16 @@
+{
+  "slug": "lxgw-zhisong",
+  "name": "霞鹜致宋 LXGW ZhiSong",
+  "module_id": "fonttemplate-lxgw-zhisong",
+  "upstream": "lxgw/LxgwZhiSong",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "IPA Font License 1.0", "assets": ["LICENSE.md"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "^LXGWZhiSongMN\\.ttf$", "weight": 4 }
+    ]
+  }
+}

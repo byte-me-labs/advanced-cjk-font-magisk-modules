@@ -53,7 +53,7 @@ jobs:
                      else true end)
               and (((.cjk_langs // ["zh-Hans", "zh-Hant,zh-Bopo", "ja", "ko"]) | type == "array" and length > 0 and ([.[] | (type == "string" and length > 0)] | all)))
               and ((.fallback // "nearest") == "nearest")
-              and ((.version_code // "digits") == "digits")
+              and (((.version_code // "digits") | type) == "string")
             ' "$f" >/dev/null || { echo "::error file=$f::配置文件校验失败" >&2; exit 1; }
           done
 

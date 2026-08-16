@@ -1,0 +1,20 @@
+{
+  "slug": "lxgw-bright-code",
+  "name": "霞鹜明亮代码 LXGW Bright Code",
+  "module_id": "fonttemplate-lxgw-bright-code",
+  "upstream": "lxgw/LxgwBright-Code",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "archive",
+    "asset": "^LxgwBrightCode\\.7z$",
+    "archive_format": "7z",
+    "entries": [
+      { "from": "LXGWBrightCode-ExtraLight\\.ttf", "weight": 2 },
+      { "from": "LXGWBrightCode-Light\\.ttf", "weight": 3 },
+      { "from": "LXGWBrightCode-Regular\\.ttf", "weight": 4 }
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "slug": "lxgw-xihei",
+  "name": "霞鹜晰黑 LXGW XiHei",
+  "module_id": "fonttemplate-lxgw-xihei",
+  "upstream": "lxgw/LxgwXiHei",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "IPA Font License 1.0", "assets": ["LICENSE.md"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "^LXGWXiHeiMN\\.ttf$", "weight": 4 }
+    ]
+  }
+}

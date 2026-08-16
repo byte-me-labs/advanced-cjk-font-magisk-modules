@@ -1,0 +1,18 @@
+{
+  "slug": "lxgw-wenkai-gb",
+  "name": "霞鹜文楷 GB LXGW WenKai GB",
+  "module_id": "fonttemplate-lxgw-wenkai-gb",
+  "upstream": "lxgw/LxgwWenKaiGB",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "^LXGWWenKaiGB-Light\\.ttf$", "weight": 3 },
+      { "from": "^LXGWWenKaiGB-Regular\\.ttf$", "weight": 4 },
+      { "from": "^LXGWWenKaiGB-Medium\\.ttf$", "weight": 5 }
+    ]
+  }
+}

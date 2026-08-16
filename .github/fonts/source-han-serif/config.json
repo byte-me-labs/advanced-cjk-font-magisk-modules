@@ -1,0 +1,24 @@
+{
+  "slug": "source-han-serif",
+  "name": "思源宋体 Source Han Serif",
+  "module_id": "fonttemplate-source-han-serif",
+  "upstream": "adobe-fonts/source-han-serif",
+  "format": "otf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["LICENSE.txt"] },
+  "download": {
+    "kind": "archive",
+    "asset": "^09_SourceHanSerifSC\\.zip$",
+    "archive_format": "zip",
+    "entries": [
+      { "from": "SourceHanSerifSC-ExtraLight\\.otf", "weight": 2 },
+      { "from": "SourceHanSerifSC-Light\\.otf", "weight": 3 },
+      { "from": "SourceHanSerifSC-Regular\\.otf", "weight": 4 },
+      { "from": "SourceHanSerifSC-Medium\\.otf", "weight": 5 },
+      { "from": "SourceHanSerifSC-SemiBold\\.otf", "weight": 6 },
+      { "from": "SourceHanSerifSC-Bold\\.otf", "weight": 7 },
+      { "from": "SourceHanSerifSC-Heavy\\.otf", "weight": 9 }
+    ]
+  }
+}

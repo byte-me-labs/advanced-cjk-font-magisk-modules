@@ -1,0 +1,20 @@
+{
+  "slug": "lxgw-bright",
+  "name": "霞鹜明亮 LXGW Bright",
+  "module_id": "fonttemplate-lxgw-bright",
+  "upstream": "lxgw/LxgwBright",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "archive",
+    "asset": "^LXGWBright\\.7z$",
+    "archive_format": "7z",
+    "entries": [
+      { "from": "LXGWBright-Light\\.ttf", "weight": 3 },
+      { "from": "LXGWBright-Regular\\.ttf", "weight": 4 },
+      { "from": "LXGWBright-Medium\\.ttf", "weight": 5 }
+    ]
+  }
+}

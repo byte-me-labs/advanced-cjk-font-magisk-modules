@@ -1,0 +1,16 @@
+{
+  "slug": "lxgw-zhenkai",
+  "name": "霞鹜臻楷 LXGW ZhenKai",
+  "module_id": "fonttemplate-lxgw-zhenkai",
+  "upstream": "lxgw/LxgwZhenKai",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "^LXGWZhenKaiGB-Regular\\.ttf$", "weight": 4 }
+    ]
+  }
+}

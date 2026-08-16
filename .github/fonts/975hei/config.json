@@ -1,0 +1,20 @@
+{
+  "slug": "975hei",
+  "name": "975黑体 LXGW 975Hei",
+  "module_id": "fonttemplate-975hei",
+  "upstream": "lxgw/975Hei",
+  "format": "ttf",
+  "version_code": "digits",
+  "fallback": "nearest",
+  "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
+  "download": {
+    "kind": "assets",
+    "entries": [
+      { "from": "^LXGW975HeiSC-200W\\.ttf$", "weight": 2 },
+      { "from": "^LXGW975HeiSC-300W\\.ttf$", "weight": 3 },
+      { "from": "^LXGW975HeiSC-400W\\.ttf$", "weight": 4 },
+      { "from": "^LXGW975HeiSC-500W\\.ttf$", "weight": 5 },
+      { "from": "^LXGW975HeiSC-700W\\.ttf$", "weight": 7 }
+    ]
+  }
+}
