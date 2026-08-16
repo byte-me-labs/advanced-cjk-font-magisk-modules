@@ -72,8 +72,12 @@ jobs:
 
             # 查重（仅 schedule）：上游最新版本是否已发布过
             upstream="$(jq -r .upstream "$f")"
-            tag="$(gh api "repos/$upstream/releases/latest" --jq '.tag_name')" \
-              || { echo "::error file=$f::无法获取上游 $upstream 的 latest release" >&2; exit 1; }
+            # releases/latest 只含正式版，仅发 prerelease 的上游（如 zhuque）会 404，回退到列表第一条
+            tag="$(gh api "repos/$upstream/releases/latest" --jq '.tag_name' 2>/dev/null || true)"
+            [[ -n "$tag" ]] || tag="$(gh api "repos/$upstream/releases?per_page=1" --jq '.[0].tag_name // empty' 2>/dev/null || true)"
+            if [[ -z "$tag" ]]; then
+              echo "::error file=$f::无法获取上游 $upstream 的 release" >&2; exit 1
+            fi
             if [[ "$SKIP_PUBLISHED" == "true" ]] && gh api "repos/$GITHUB_REPOSITORY/releases/tags/$slug-$tag" >/dev/null 2>&1; then
               echo "跳过（已发布）：$slug $tag"
               continue
