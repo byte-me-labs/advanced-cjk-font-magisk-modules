@@ -10,6 +10,17 @@
 
 MODPATH=${MODPATH:-${0%/*}}
 
+# 同类字体模块互斥：安装本模块时，停用其他已安装的本项目字体模块（仅保留本次刷入的）。
+# 机制同 Vector 停用原版 LSPosed —— Magisk 以 /data/adb/modules/<id>/disable 空文件标记停用。
+MY_ID=$(grep_prop id "$MODPATH/module.prop" 2>/dev/null)
+[ -z "$MY_ID" ] && MY_ID=$(basename "$MODPATH")
+for d in /data/adb/modules/byte-me-labs-font-*; do
+  [ -d "$d" ] || continue
+  [ "$(basename "$d")" = "$MY_ID" ] && continue
+  touch "$d/disable"
+  ui_print "- 已停用同类字体模块: $(basename "$d")"
+done
+
 MANIFEST="$MODPATH/fontgen.json"
 if [ ! -f "$MANIFEST" ]; then
   abort "缺少 $MANIFEST，无法生成字体配置"

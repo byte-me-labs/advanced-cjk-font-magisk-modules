@@ -71,7 +71,7 @@
 {
   "slug": "lxgw-wenkai",
   "name": "霞鹜文楷 LXGW WenKai",
-  "module_id": "fonttemplate-lxgw-wenkai",
+  "module_id": "byte-me-labs-font-lxgw-wenkai",
   "upstream": "lxgw/LxgwWenKai",
   "format": "ttf",
   "version_code": "digits",

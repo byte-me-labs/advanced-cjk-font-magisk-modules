@@ -1,7 +1,7 @@
 {
   "slug": "975hei",
   "name": "975黑体 LXGW 975Hei",
-  "module_id": "fonttemplate-975hei",
+  "module_id": "byte-me-labs-font-975hei",
   "upstream": "lxgw/975Hei",
   "format": "ttf",
   "version_code": "digits",

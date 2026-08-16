@@ -1,7 +1,7 @@
 {
   "slug": "dream-han-sans",
   "name": "梦源黑体 Dream Han Sans",
-  "module_id": "fonttemplate-dream-han-sans",
+  "module_id": "byte-me-labs-font-dream-han-sans",
   "upstream": "Pal3love/dream-han-cjk",
   "format": "ttf",
   "version_code": "sans-([0-9.]+)",

@@ -1,7 +1,7 @@
 {
   "slug": "lxgw-zhenkai",
   "name": "霞鹜臻楷 LXGW ZhenKai",
-  "module_id": "fonttemplate-lxgw-zhenkai",
+  "module_id": "byte-me-labs-font-lxgw-zhenkai",
   "upstream": "lxgw/LxgwZhenKai",
   "format": "ttf",
   "version_code": "digits",

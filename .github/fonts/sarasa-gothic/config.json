@@ -1,7 +1,7 @@
 {
   "slug": "sarasa-gothic",
   "name": "更纱黑体 Sarasa Gothic",
-  "module_id": "fonttemplate-sarasa-gothic",
+  "module_id": "byte-me-labs-font-sarasa-gothic",
   "upstream": "be5invis/Sarasa-Gothic",
   "format": "ttf",
   "version_code": "digits",

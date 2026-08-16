@@ -1,7 +1,7 @@
 {
   "slug": "lxgw-wenkai-screen",
   "name": "霞鹜文楷屏幕版 LXGW WenKai Screen",
-  "module_id": "fonttemplate-lxgw-wenkai-screen",
+  "module_id": "byte-me-labs-font-lxgw-wenkai-screen",
   "upstream": "lxgw/LxgwWenKai-Screen",
   "format": "ttf",
   "version_code": "digits",

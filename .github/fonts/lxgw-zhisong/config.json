@@ -1,7 +1,7 @@
 {
   "slug": "lxgw-zhisong",
   "name": "霞鹜致宋 LXGW ZhiSong",
-  "module_id": "fonttemplate-lxgw-zhisong",
+  "module_id": "byte-me-labs-font-lxgw-zhisong",
   "upstream": "lxgw/LxgwZhiSong",
   "format": "ttf",
   "version_code": "digits",

@@ -1,7 +1,7 @@
 {
   "slug": "source-han-sans",
   "name": "思源黑体 Source Han Sans",
-  "module_id": "fonttemplate-source-han-sans",
+  "module_id": "byte-me-labs-font-source-han-sans",
   "upstream": "adobe-fonts/source-han-sans",
   "format": "otf",
   "version_code": "digits",
