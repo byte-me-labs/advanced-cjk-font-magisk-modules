@@ -6,7 +6,7 @@
 # 配置文件位于 .github/fonts/<slug>/config.json，本脚本只处理那一个字体。
 #
 # 流程：
-#   1. 用 gh api 取上游 latest release 的 tag_name 作为版本号；
+#   1. 用 gh api 取上游最新 release（仅 prerelease 时回退列表第一条）的 tag_name 作为版本号；
 #   2. 若为定时触发（SKIP_PUBLISHED=true）且本仓库已存在 "slug-tag" 这个 tag 则跳过；
 #      手动触发（workflow_dispatch）时 SKIP_PUBLISHED=false，强制重建并重新发布；
 #   3. 下载字体（保留上游原始文件名）、下载 fontgen 二进制（三架构）、生成 fontgen.json、
@@ -40,6 +40,17 @@ SKELETON_FILES=(customize.sh post-fs-data.sh service.sh uninstall.sh sepolicy.ru
 
 info() { printf '\033[1;34m[%s]\033[0m %s\n' "$1" "$2"; }
 warn() { printf '\033[1;33m[警告]\033[0m %s\n' "$*" >&2; }
+
+# 获取上游最新 release 的 JSON 对象。优先 releases/latest（只含正式版）；
+# 若上游仅发布 prerelease（releases/latest 返回 404），回退到列表第一条（含 prerelease）。
+fetch_release() {
+  local repo="$1" out
+  if out="$(gh api "repos/$repo/releases/latest" 2>/dev/null)"; then
+    printf '%s' "$out"
+    return 0
+  fi
+  gh api "repos/$repo/releases?per_page=1" --jq '.[0] | select(. != null)'
+}
 
 # 从 release 资产里按正则找到唯一匹配，输出 browser_download_url；0/多匹配返回非零。
 # 依赖全局数组 ASSETS（每行 "name<TAB>url"）。
@@ -107,7 +118,12 @@ lic_type="$(jq -r .license.type <<<"$font")"
 kind="$(jq -r .download.kind <<<"$font")"
 vercode="$(jq -r '.version_code // "digits"' <<<"$font")"
 
-tag="$(gh api "repos/$upstream/releases/latest" --jq '.tag_name')"
+rel="$(fetch_release "$upstream")"
+if [[ -z "$rel" ]]; then
+  warn "$slug 上游没有可用的 release"
+  exit 1
+fi
+tag="$(jq -r '.tag_name' <<<"$rel")"
 release_tag="$slug-$tag"
 
 if [[ "$SKIP_PUBLISHED" == "true" ]] && gh api "repos/$REPO/releases/tags/$release_tag" >/dev/null 2>&1; then
@@ -119,8 +135,7 @@ info "$slug" "构建 $tag"
 
 work="$(mktemp -d)"
 src="$work/src"; mkdir -p "$src"
-mapfile -t ASSETS < <(gh api "repos/$upstream/releases/latest" \
-    --jq '.assets[] | .name + "\t" + .browser_download_url')
+mapfile -t ASSETS < <(jq -r '.assets[]? | .name + "\t" + .browser_download_url' <<<"$rel")
 if (( ${#ASSETS[@]} == 0 )); then
   warn "$slug 没有可用的 release 资产"
   exit 1

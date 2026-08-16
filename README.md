@@ -21,7 +21,7 @@
 
 1. 工作流每天定时（UTC 03:17）运行，也可在 Actions 页手动触发；为每个字体各起一个作业并行构建。
 2. 对每个字体：
-   - 用 `gh api` 取上游仓库 `latest release` 的 `tag_name` 作为版本号；
+   - 用 `gh api` 取上游仓库最新 release 的 `tag_name` 作为版本号（仅 prerelease 时回退到列表第一条）；
    - 定时触发时若本仓库已存在 `slug-版本` 这个 tag，则跳过（手动触发强制重建）；
    - 按配置下载字体文件、下载 [`fontgen`](https://github.com/byte-me-labs/magisk-module-fontgen) 三架构二进制（arm64/arm/x64）、生成 `fontgen.json`、写入 `module.prop`、携带许可证文件，打包为 zip；
    - 由 `softprops/action-gh-release` 创建 Release 并上传 zip。
