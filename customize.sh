@@ -29,5 +29,9 @@ if [ ! -f "$BIN" ]; then
   abort "缺少 fontgen 二进制: $BIN"
 fi
 
+# Magisk 安装时 set_default_perm 会把模块内所有文件 chmod 0644（去掉可执行位），
+# 这里必须显式恢复，否则 exec 会报 Permission denied（退出码 126）。
+chmod 755 "$BIN"
+
 "$BIN" generate --system /system --out "$MODPATH/system" --manifest "$MANIFEST" \
   || abort "fontgen 生成字体配置失败"
