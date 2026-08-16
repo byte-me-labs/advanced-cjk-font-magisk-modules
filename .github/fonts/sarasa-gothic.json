@@ -12,11 +12,11 @@
     "asset": "^SarasaGothic-TTF-[0-9.]+\\.7z$",
     "archive_format": "7z",
     "entries": [
-      { "from": "sarasa-gothic-extralight\\.ttf", "weight": 2 },
-      { "from": "sarasa-gothic-light\\.ttf", "weight": 3 },
-      { "from": "sarasa-gothic-regular\\.ttf", "weight": 4 },
-      { "from": "sarasa-gothic-semibold\\.ttf", "weight": 6 },
-      { "from": "sarasa-gothic-bold\\.ttf", "weight": 7 }
+      { "from": "SarasaGothicSC-ExtraLight\\.ttf", "weight": 2 },
+      { "from": "SarasaGothicSC-Light\\.ttf", "weight": 3 },
+      { "from": "SarasaGothicSC-Regular\\.ttf", "weight": 4 },
+      { "from": "SarasaGothicSC-SemiBold\\.ttf", "weight": 6 },
+      { "from": "SarasaGothicSC-Bold\\.ttf", "weight": 7 }
     ]
   }
 }
