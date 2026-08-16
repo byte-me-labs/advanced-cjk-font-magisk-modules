@@ -29,8 +29,9 @@ CFG_FILE="${1:?用法: $0 <字体配置.json>}"
 [[ "$CFG_FILE" == /* ]] || CFG_FILE="$ROOT/$CFG_FILE"
 DRY_RUN="${DRY_RUN:-}"
 
-# 模板骨架：整目录复制 + 单文件复制
-SKELETON_DIRS=(META-INF system/etc system/fonts system/product)
+# 模板骨架：整目录复制（META-INF、system 为顶层目录，复制整棵子树以保留嵌套结构）
+#   + 单文件复制（模块根目录的脚本/配置）
+SKELETON_DIRS=(META-INF system)
 SKELETON_FILES=(customize.sh post-fs-data.sh service.sh uninstall.sh sepolicy.rule system.prop)
 
 info() { printf '\033[1;34m[%s]\033[0m %s\n' "$1" "$2"; }

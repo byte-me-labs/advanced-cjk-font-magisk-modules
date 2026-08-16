@@ -21,7 +21,7 @@ jobs:
     outputs:
       include: ${{ steps.gen.outputs.include }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: gen
         name: 校验配置、查重并生成构建矩阵
         env:
@@ -93,7 +93,7 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.matrix.outputs.include) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: 安装 p7zip（更纱黑体的 .7z 归档需要）
         run: sudo apt-get update && sudo apt-get install -y p7zip-full
