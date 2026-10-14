@@ -1,6 +1,6 @@
 {
   "slug": "lxgw-zhenkai",
-  "name": "霞鹜臻楷 LXGW ZhenKai",
+  "name": "霞鹜臻楷 Slab 版 LXGW ZhenKai Slab",
   "module_id": "byte-me-labs-font-lxgw-zhenkai",
   "upstream": "lxgw/LxgwZhenKai",
   "format": "ttf",
@@ -10,7 +10,7 @@
   "download": {
     "kind": "assets",
     "entries": [
-      { "from": "^LXGWZhenKaiGB-Regular\\.ttf$", "weight": 4 }
+      { "from": "^LXGWZhenKaiSlabGB-Regular\\.ttf$", "weight": 4 }
     ]
   }
 }

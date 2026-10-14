@@ -75,8 +75,10 @@ jobs:
             # releases/latest 只含正式版，仅发 prerelease 的上游（如 zhuque）会 404，回退到列表第一条。
             # 注意：gh api 在 404 时把错误体写到 stdout，故用「失败即清空」而非 || true，
             # 否则 tag 会被错误体占满、回退永不触发。
-            tag="$(gh api "repos/$upstream/releases/latest" --jq '.tag_name' 2>/dev/null)" || tag=""
-            [[ -n "$tag" ]] || tag="$(gh api "repos/$upstream/releases?per_page=1" --jq '.[0].tag_name // empty' 2>/dev/null)" || tag=""
+            rel="$(gh api "repos/$upstream/releases/latest" 2>/dev/null)" || rel=""
+            [[ -n "$(jq -r '.tag_name // empty' <<<"$rel" 2>/dev/null)" ]] \
+              || rel="$(gh api "repos/$upstream/releases?per_page=1" --jq '.[0] // empty' 2>/dev/null)" || rel=""
+            tag="$(jq -r '.tag_name // empty' <<<"$rel" 2>/dev/null)"
             if [[ -z "$tag" ]]; then
               echo "::error file=$f::无法获取上游 $upstream 的 release" >&2; exit 1
             fi
@@ -84,6 +86,27 @@ jobs:
               echo "跳过（已发布）：$slug $tag"
               continue
             fi
+
+            # 校验下载源正则能唯一匹配到上游资产（与 build_fonts.sh 的 pick_url 同一约定）。
+            # 上游改名/删档在这里 fail-fast：否则矩阵照常通过，问题要到 build 阶段才暴露，
+            # 且该字体因始终发不出 release 会随每个新版本每天重复失败。
+            assets="$(jq -r '.assets[]?.name' <<<"$rel")"
+            if [[ "$(jq -r .download.kind "$f")" == "archive" ]]; then
+              patterns="$(jq -r '.download.asset' "$f")"
+            else
+              patterns="$(jq -r '.download.entries[].from' "$f")"
+            fi
+            while IFS= read -r pat; do
+              cnt=0
+              while IFS= read -r an; do
+                [[ "$an" =~ $pat ]] && cnt=$((cnt + 1))
+              done <<< "$assets"
+              if (( cnt != 1 )); then
+                echo "::error file=$f::下载源正则 '$pat' 匹配到 $cnt 个上游资产（应为 1），上游可能已改名或删除" >&2
+                exit 1
+              fi
+            done <<< "$patterns"
+
             echo "待构建：$slug $tag"
             rows+=("$(jq -c --arg path "$f" '{slug: .slug, config: $path}' "$f")")
           done
