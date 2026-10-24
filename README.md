@@ -67,7 +67,7 @@ Magisk 刷新模块列表时读取该文件，比较 `versionCode` 判断是否�
 <!-- fonts-table:start -->
 | slug | 字体 | 上游 | 格式 | 最新版本 | 构建时间 |
 | ---- | ---- | ---- | ---- | ---- | ---- |
-| `lxgw-wenkai` | 霞鹜文楷 LXGW WenKai | [lxgw/LxgwWenKai](https://github.com/lxgw/LxgwWenKai) | ttf | `v1.530` | 2026-10-24 03:26 UTC |
+| `lxgw-wenkai` | 霞鹜文楷 LXGW WenKai | [lxgw/LxgwWenKai](https://github.com/lxgw/LxgwWenKai) | ttf | `v1.530` | 2026-10-24 03:32 UTC |
 | `lxgw-wenkai-screen` | 霞鹜文楷屏幕版 LXGW WenKai Screen | [lxgw/LxgwWenKai-Screen](https://github.com/lxgw/LxgwWenKai-Screen) | ttf | `v1.530` | 2026-10-24 03:26 UTC |
 | `lxgw-wenkai-gb` | 霞鹜文楷 GB LXGW WenKai GB | [lxgw/LxgwWenKaiGB](https://github.com/lxgw/LxgwWenKaiGB) | ttf | `v1.530` | 2026-10-24 03:26 UTC |
 | `lxgw-zhenkai` | 霞鹜臻楷 Slab 版 LXGW ZhenKai Slab | [lxgw/LxgwZhenKai](https://github.com/lxgw/LxgwZhenKai) | ttf | `v0.827` | 2026-10-24 03:26 UTC |
