@@ -14,6 +14,12 @@ on:
 permissions:
   contents: write
 
+# 同一时间只跑一个实例：update 作业会向 master 推送 updates/，
+# 并发运行会互相覆盖或产生非快进推送。排队而非取消，避免中断已开始的构建。
+concurrency:
+  group: build-fonts
+  cancel-in-progress: false
+
 jobs:
   # 校验配置、过滤、查重，产出需要构建的字体矩阵（每个字体一行）
   matrix:
@@ -53,7 +59,6 @@ jobs:
                      else true end)
               and (((.cjk_langs // ["zh-Hans", "zh-Hant,zh-Bopo", "ja", "ko"]) | type == "array" and length > 0 and ([.[] | (type == "string" and length > 0)] | all)))
               and ((.fallback // "nearest") == "nearest")
-              and (((.version_code // "digits") | type) == "string")
             ' "$f" >/dev/null || { echo "::error file=$f::配置文件校验失败" >&2; exit 1; }
           done
 
@@ -147,3 +152,53 @@ jobs:
           body: ${{ steps.build.outputs.notes }}
           files: dist/*.zip
           fail_on_unmatched_files: true
+
+      # 发布成功后才上传更新清单，避免清单指向不存在的 release。
+      # 该步骤失败会跳过，次日定时任务的查重会认为该字体已发布而不再重建，
+      # 此时需手动触发一次该字体（SKIP_PUBLISHED=false）补齐清单。
+      - name: 上传更新清单 ${{ matrix.slug }}
+        if: steps.build.outputs.should_publish == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: update-${{ matrix.slug }}
+          path: dist/updates/${{ matrix.slug }}.json
+          if-no-files-found: error
+
+  # 汇总各构建作业产出的更新清单，一次性提交到 master 的 updates/，供模块内 Magisk 检查更新。
+  # 每个字体一个 artifact，合并后单次提交，避免多作业并发推送 master 产生冲突。
+  update:
+    needs: build
+    # 部分字体构建失败时仍提交成功者的清单；整批被跳过（无新版本）或运行被取消时不提交。
+    if: ${{ !cancelled() && needs.build.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: master
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: update-*
+          path: artifacts
+          merge-multiple: true
+
+      - name: 合并并提交 updates/
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(artifacts/*.json)
+          if (( ${#files[@]} == 0 )); then
+            echo "没有新的更新清单，跳过"
+            exit 0
+          fi
+          mkdir -p updates
+          cp -f "${files[@]}" updates/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add updates
+          if git diff --cached --quiet; then
+            echo "updates/ 无变化，跳过提交"
+            exit 0
+          fi
+          git commit -m "chore: 更新 Magisk 模块更新清单"
+          git push origin HEAD:master

@@ -24,7 +24,8 @@
    - 用 `gh api` 取上游仓库最新 release 的 `tag_name` 作为版本号（仅 prerelease 时回退到列表第一条）；
    - 定时触发时若本仓库已存在 `slug-版本` 这个 tag，则跳过（手动触发强制重建）；
    - 按配置下载字体文件、下载 [`fontgen`](https://github.com/byte-me-labs/magisk-module-fontgen) 三架构二进制（arm64/arm/x64）、生成 `fontgen.json`、写入 `module.prop`、携带许可证文件，打包为 zip；
-   - 由 `softprops/action-gh-release` 创建 Release 并上传 zip。
+   - 由 `softprops/action-gh-release` 创建 Release 并上传 zip；
+   - 生成 `updates/<slug>.json` 更新清单，由汇总作业收集全部清单后**一次性**提交到 `master`（单次提交避免并行作业互相冲突）。
 
 ### 安装期（customize.sh）
 
@@ -35,6 +36,31 @@
 3. 生成结果写到 `$MODPATH/system/etc/`，由 Magisk 挂载覆盖系统配置。
 
 之所以在**安装时**而非开机时生成：安装时模块尚未挂载到 `/system`，读到的还是设备原厂配置；开机后模块已覆盖挂载，再读只会读到自己的文件，拿不到原厂配置。生成逻辑是**字节级拼接**（定位用解析、写入用拼接），不重新序列化 XML，因此原厂配置里的注释、缩进、未识别的属性都会被原样保留。
+
+## 模块内更新检查
+
+生成的 `module.prop` 含 `updateJson` 字段，指向本仓库 `master` 分支上的更新清单：
+
+```
+updateJson=https://raw.githubusercontent.com/byte-me-labs/advanced-cjk-font-magisk-modules/master/updates/<slug>.json
+```
+
+Magisk 刷新模块列表时读取该文件，比较 `versionCode` 判断是否有新版本，并在模块页提供更新入口。清单格式：
+
+```json
+{
+  "version": "v0.827",
+  "versionCode": 20261024,
+  "zipUrl": "https://github.com/byte-me-labs/advanced-cjk-font-magisk-modules/releases/download/lxgw-zhenkai-v0.827/magisk-module-font-lxgw-zhenkai-v0.827.zip",
+  "changelog": "https://github.com/byte-me-labs/advanced-cjk-font-magisk-modules/releases/tag/lxgw-zhenkai-v0.827"
+}
+```
+
+- `versionCode` 使用**构建日期**（UTC `YYYYMMDD`，如 `20261024`），不再从上游 tag 提取。历史 tag 派生的值最高为 6 位（`YYMMDD` 形式，如 `261022`），8 位日期恒大于它，因此切换后所有已安装模块都会收到一次更新。
+- 定时任务每天运行一次，日期天然递增；同一天内多次重建版本号相同，不会重复提示更新。
+- Magisk 用 Kotlin `Int` 解析 `versionCode`，越界（> 2147483647）会中止 `module.prop` 后续字段解析，故 `updateJson` 写在 `versionCode` **之前**。
+- 更新清单只在内容变化时提交，不会产生空提交。若某次发布后清单未能提交（对应作业在上传清单前失败），手动触发该字体重建即可补齐。
+- KernelSU 同样支持 `updateJson`；APatch 未验证。
 
 ## 支持的字体
 
@@ -74,7 +100,6 @@
   "module_id": "byte-me-labs-font-lxgw-wenkai",
   "upstream": "lxgw/LxgwWenKai",
   "format": "ttf",
-  "version_code": "digits",
   "fallback": "nearest",
   "license": { "type": "SIL OFL 1.1", "assets": ["OFL.txt"] },
   "download": {
@@ -99,7 +124,7 @@
 | `module_id` | ✅ | Magisk 模块 id，只能含字母、数字、`_`、`.`、`-` |
 | `upstream` | ✅ | 上游仓库 `owner/repo`，用于取 `latest release` |
 | `format` | ✅ | `ttf` 或 `otf`，声明字体文件格式 |
-| `version_code` | ❌ | 默认 `digits`。从上游 tag 提取数字版 `versionCode` 的规则：`digits` 表示只保留数字；也可填一个含捕获组的正则，取第 1 组 |
+| `version_code` | ❌ | **已弃用（保留但忽略）**。`versionCode` 现统一使用构建日期（UTC `YYYYMMDD`），不再从上游 tag 提取 |
 | `fallback` | ❌ | 默认 `nearest`。字重回退策略，目前仅支持 `nearest` |
 | `cjk_langs` | ❌ | 默认 `["zh-Hans", "zh-Hant,zh-Bopo", "ja", "ko"]`。生成的字体的语言标签列表（每个元素对应一个 `<family lang="...">`） |
 

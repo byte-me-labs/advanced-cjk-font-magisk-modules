@@ -13,7 +13,8 @@
 #      写入 module.prop、携带许可证、打包 zip；fonts.xml 与 font_fallback.xml 不在构建期
 #      生成，而是由 customize.sh 在安装时调用 fontgen 读取原厂配置、插入 CJK 族动态生成；
 #   4. 产物写到 dist/ 并输出发布信息，由工作流的 softprops/action-gh-release
-#      步骤创建 Release 并上传 zip。
+#      步骤创建 Release 并上传 zip；同时生成 dist/updates/<slug>.json（Magisk 更新清单），
+#      由工作流的 update 作业汇总后提交到 master 的 updates/。
 #
 # 依赖（ubuntu-latest 均已预装）：gh、jq、curl、zip、unzip；
 #   处理 .7z 归档时额外需要 p7zip-full（由工作流安装）。
@@ -22,6 +23,7 @@
 #   GITHUB_REPOSITORY  当前仓库（owner/name），GitHub Actions 自动提供。
 #   GITHUB_TOKEN       gh 认证令牌，GitHub Actions 自动提供。
 #   DRY_RUN=1          只构建不发布（should_publish=false）。
+#   VERSION_DATE       可选，覆盖 versionCode 的日期（YYYYMMDD），默认取 UTC 当天。
 set -euo pipefail
 
 REPO="${GITHUB_REPOSITORY:?必须设置 GITHUB_REPOSITORY}"
@@ -95,20 +97,19 @@ pick_file() {
   printf '%s' "$found"
 }
 
-version_code() {
-  local tag="$1" rule="${2:-digits}" m digits
-  if [[ "$rule" == "digits" ]]; then
-    m="$tag"
-  else
-    if [[ "$tag" =~ $rule ]]; then
-      m="${BASH_REMATCH[1]:-${BASH_REMATCH[0]}}"
-    else
-      warn "version_code 正则 '$rule' 未匹配 tag '$tag'"
-      m="$tag"
-    fi
+# Magisk 的 versionCode 使用构建日期（UTC YYYYMMDD），不再从上游 tag 提取。
+# 历史 tag 派生值最高为 261022（YYMMDD 格式），8 位日期恒大于它，切换后不会倒挂；
+# 定时任务每天一次，日期天然单调递增（同日重建版本号相同，属预期行为）。
+# 注意：Magisk 用 Kotlin Int 解析 versionCode，越界会抛出并中止 module.prop 后续字段解析，
+# 因此必须落在 0..2147483647 内（8 位日期永远满足）。
+# VERSION_DATE 可覆盖日期，便于本地复现。
+build_version_code() {
+  local v="${VERSION_DATE:-$(date -u +%Y%m%d)}"
+  if ! [[ "$v" =~ ^[0-9]+$ ]] || (( 10#$v > 2147483647 )); then
+    warn "versionCode 非法或超出 Int32 范围：$v（VERSION_DATE 应为 YYYYMMDD）"
+    return 1
   fi
-  digits="$(printf '%s' "$m" | tr -cd '0-9')"
-  [[ -n "$digits" ]] && printf '%s' "$digits" || printf '1'
+  printf '%s' "$((10#$v))"
 }
 
 # 读取本字体的配置
@@ -119,7 +120,7 @@ module_id="$(jq -r .module_id <<<"$font")"
 upstream="$(jq -r .upstream <<<"$font")"
 lic_type="$(jq -r .license.type <<<"$font")"
 kind="$(jq -r .download.kind <<<"$font")"
-vercode="$(jq -r '.version_code // "digits"' <<<"$font")"
+version_code_value="$(build_version_code)"
 
 rel="$(fetch_release "$upstream")"
 if [[ -z "$rel" ]]; then
@@ -222,11 +223,15 @@ while IFS= read -r lic; do
 done < <(jq -r '.license.assets[]' <<<"$font")
 
 # module.prop（LF 行尾）
+# updateJson 必须在 versionCode 之前：Magisk 解析 versionCode 失败会中止后续字段，
+# 放在前面可保证更新检查地址始终能被读到。updateJson 指向 master 上的更新清单，
+# 该文件由工作流的 update 作业汇总各构建作业的产物后统一提交。
 {
   echo "id=$module_id"
   echo "name=$name"
   echo "version=$tag"
-  echo "versionCode=$(version_code "$tag" "$vercode")"
+  echo "updateJson=https://raw.githubusercontent.com/$REPO/master/updates/$slug.json"
+  echo "versionCode=$version_code_value"
   echo "author=byte-me-labs (upstream: $upstream)"
   echo "description=$name $tag，自动打包自 $upstream。许可证：$lic_type。"
 } > "$mod/module.prop"
@@ -237,6 +242,21 @@ mkdir -p "$ROOT/dist"
 zippath="$ROOT/dist/$zipname"
 (cd "$mod" && zip -rq "$zippath" .)
 info "$slug" "产物 dist/$zipname"
+
+# 生成 Magisk 更新清单（module.prop 的 updateJson 指向它），由工作流的 update 作业
+# 汇总后统一提交到 master 的 updates/。不放进模块 zip：它是模块之外的发布元数据。
+# DRY_RUN 不产出，避免本地试跑生成指向不存在 release 的假清单。
+if [[ -z "$DRY_RUN" ]]; then
+  updates_dir="$ROOT/dist/updates"; mkdir -p "$updates_dir"
+  jq -n \
+    --arg version "$tag" \
+    --argjson versionCode "$version_code_value" \
+    --arg zipUrl "https://github.com/$REPO/releases/download/$release_tag/$zipname" \
+    --arg changelog "https://github.com/$REPO/releases/tag/$release_tag" \
+    '{version: $version, versionCode: $versionCode, zipUrl: $zipUrl, changelog: $changelog}' \
+    > "$updates_dir/$slug.json"
+  info "$slug" "更新清单 dist/updates/$slug.json"
+fi
 
 # 把发布信息输出给工作流的 softprops 步骤；本地 DRY_RUN 无 GITHUB_OUTPUT，自动跳过
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
