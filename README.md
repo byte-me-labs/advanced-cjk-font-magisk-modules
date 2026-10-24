@@ -64,30 +64,34 @@ Magisk 刷新模块列表时读取该文件，比较 `versionCode` 判断是否�
 
 ## 支持的字体
 
-| slug | 字体 | 上游 | 格式 |
-| ---- | ---- | ---- | ---- |
-| `lxgw-wenkai` | 霞鹜文楷 LXGW WenKai | [lxgw/LxgwWenKai](https://github.com/lxgw/LxgwWenKai) | ttf |
-| `lxgw-wenkai-screen` | 霞鹜文楷屏幕版 LXGW WenKai Screen | [lxgw/LxgwWenKai-Screen](https://github.com/lxgw/LxgwWenKai-Screen) | ttf |
-| `lxgw-wenkai-gb` | 霞鹜文楷 GB LXGW WenKai GB | [lxgw/LxgwWenKaiGB](https://github.com/lxgw/LxgwWenKaiGB) | ttf |
-| `lxgw-zhenkai` | 霞鹜臻楷 LXGW ZhenKai | [lxgw/LxgwZhenKai](https://github.com/lxgw/LxgwZhenKai) | ttf |
-| `lxgw-xihei` | 霞鹜晰黑 LXGW XiHei | [lxgw/LxgwXiHei](https://github.com/lxgw/LxgwXiHei) | ttf |
-| `lxgw-zhisong` | 霞鹜致宋 LXGW ZhiSong | [lxgw/LxgwZhiSong](https://github.com/lxgw/LxgwZhiSong) | ttf |
-| `lxgw-neo-xihei` | 霞鹜新晰黑 LXGW Neo XiHei | [lxgw/LxgwNeoXiHei](https://github.com/lxgw/LxgwNeoXiHei) | ttf |
-| `lxgw-neo-zhisong` | 霞鹜新致宋 LXGW Neo ZhiSong | [lxgw/LxgwNeoZhiSong](https://github.com/lxgw/LxgwNeoZhiSong) | ttf |
-| `lxgw-neo-xizhi-screen` | 霞鹜新晰黑屏幕版 LXGW Neo XiHei Screen | [lxgw/LxgwNeoXiZhi-Screen](https://github.com/lxgw/LxgwNeoXiZhi-Screen) | ttf |
-| `sim-xizhi` | 简晰知 Sim XiZhi | [lxgw/SimXiZhi](https://github.com/lxgw/SimXiZhi) | ttf |
-| `lxgw-marker-gothic` | 霞鹜马科特黑体 LXGW Marker Gothic | [lxgw/LxgwMarkerGothic](https://github.com/lxgw/LxgwMarkerGothic) | ttf |
-| `lxgw-bright` | 霞鹜明亮 LXGW Bright | [lxgw/LxgwBright](https://github.com/lxgw/LxgwBright) | ttf |
-| `lxgw-bright-code` | 霞鹜明亮代码 LXGW Bright Code | [lxgw/LxgwBright-Code](https://github.com/lxgw/LxgwBright-Code) | ttf |
-| `975hei` | 975黑体 LXGW 975Hei | [lxgw/975Hei](https://github.com/lxgw/975Hei) | ttf |
-| `975yuan` | 975圆体 LXGW 975Yuan | [lxgw/975Yuan](https://github.com/lxgw/975Yuan) | ttf |
-| `sarasa-gothic` | 更纱黑体 Sarasa Gothic | [be5invis/Sarasa-Gothic](https://github.com/be5invis/Sarasa-Gothic) | ttf |
-| `source-han-sans` | 思源黑体 Source Han Sans | [adobe-fonts/source-han-sans](https://github.com/adobe-fonts/source-han-sans) | otf |
-| `source-han-serif` | 思源宋体 Source Han Serif | [adobe-fonts/source-han-serif](https://github.com/adobe-fonts/source-han-serif) | otf |
-| `dream-han-sans` | 梦源黑体 Dream Han Sans | [Pal3love/dream-han-cjk](https://github.com/Pal3love/dream-han-cjk) | ttf |
-| `zhuque` | 朱雀仿宋 Zhuque Fangsong | [TrionesType/zhuque](https://github.com/TrionesType/zhuque) | ttf |
-| `maple-mono` | 枫叶等宽 Maple Mono | [subframe7536/maple-font](https://github.com/subframe7536/maple-font) | ttf |
-| `smiley-sans` | 得意黑 Smiley Sans | [atelier-anchor/smiley-sans](https://github.com/atelier-anchor/smiley-sans) | ttf |
+<!-- fonts-table:start -->
+| slug | 字体 | 上游 | 格式 | 最新版本 | 构建时间 |
+| ---- | ---- | ---- | ---- | ---- | ---- |
+| `lxgw-wenkai` | 霞鹜文楷 LXGW WenKai | [lxgw/LxgwWenKai](https://github.com/lxgw/LxgwWenKai) | ttf | `v1.530` | 2026-10-24 03:26 UTC |
+| `lxgw-wenkai-screen` | 霞鹜文楷屏幕版 LXGW WenKai Screen | [lxgw/LxgwWenKai-Screen](https://github.com/lxgw/LxgwWenKai-Screen) | ttf | `v1.530` | 2026-10-24 03:26 UTC |
+| `lxgw-wenkai-gb` | 霞鹜文楷 GB LXGW WenKai GB | [lxgw/LxgwWenKaiGB](https://github.com/lxgw/LxgwWenKaiGB) | ttf | `v1.530` | 2026-10-24 03:26 UTC |
+| `lxgw-zhenkai` | 霞鹜臻楷 Slab 版 LXGW ZhenKai Slab | [lxgw/LxgwZhenKai](https://github.com/lxgw/LxgwZhenKai) | ttf | `v0.827` | 2026-10-24 03:26 UTC |
+| `lxgw-xihei` | 霞鹜晰黑 LXGW XiHei | [lxgw/LxgwXiHei](https://github.com/lxgw/LxgwXiHei) | ttf | `v1.002` | 2026-10-24 03:26 UTC |
+| `lxgw-zhisong` | 霞鹜致宋 LXGW ZhiSong | [lxgw/LxgwZhiSong](https://github.com/lxgw/LxgwZhiSong) | ttf | `v1.002` | 2026-10-24 03:26 UTC |
+| `lxgw-neo-xihei` | 霞鹜新晰黑 LXGW Neo XiHei | [lxgw/LxgwNeoXiHei](https://github.com/lxgw/LxgwNeoXiHei) | ttf | `v1.308` | 2026-10-24 03:26 UTC |
+| `lxgw-neo-zhisong` | 霞鹜新致宋 LXGW Neo ZhiSong | [lxgw/LxgwNeoZhiSong](https://github.com/lxgw/LxgwNeoZhiSong) | ttf | `v1.070` | 2026-10-24 03:26 UTC |
+| `lxgw-neo-xizhi-screen` | 霞鹜新晰黑屏幕版 LXGW Neo XiHei Screen | [lxgw/LxgwNeoXiZhi-Screen](https://github.com/lxgw/LxgwNeoXiZhi-Screen) | ttf | `26.08.21` | 2026-10-24 03:26 UTC |
+| `sim-xizhi` | 简晰知 Sim XiZhi | [lxgw/SimXiZhi](https://github.com/lxgw/SimXiZhi) | ttf | `v1.103` | 2026-10-24 03:26 UTC |
+| `lxgw-marker-gothic` | 霞鹜马科特黑体 LXGW Marker Gothic | [lxgw/LxgwMarkerGothic](https://github.com/lxgw/LxgwMarkerGothic) | ttf | `v1.004` | 2026-10-24 03:26 UTC |
+| `lxgw-bright` | 霞鹜明亮 LXGW Bright | [lxgw/LxgwBright](https://github.com/lxgw/LxgwBright) | ttf | `26.10.22` | 2026-10-24 03:26 UTC |
+| `lxgw-bright-code` | 霞鹜明亮代码 LXGW Bright Code | [lxgw/LxgwBright-Code](https://github.com/lxgw/LxgwBright-Code) | ttf | `26.10.22` | 2026-10-24 03:26 UTC |
+| `975hei` | 975黑体 LXGW 975Hei | [lxgw/975Hei](https://github.com/lxgw/975Hei) | ttf | `26.06.20` | 2026-10-24 03:26 UTC |
+| `975yuan` | 975圆体 LXGW 975Yuan | [lxgw/975Yuan](https://github.com/lxgw/975Yuan) | ttf | `26.07.26` | 2026-10-24 03:26 UTC |
+| `sarasa-gothic` | 更纱黑体 Sarasa Gothic | [be5invis/Sarasa-Gothic](https://github.com/be5invis/Sarasa-Gothic) | ttf | `v1.0.42` | 2026-10-24 03:26 UTC |
+| `source-han-sans` | 思源黑体 Source Han Sans | [adobe-fonts/source-han-sans](https://github.com/adobe-fonts/source-han-sans) | otf | `2.005R` | 2026-10-24 03:26 UTC |
+| `source-han-serif` | 思源宋体 Source Han Serif | [adobe-fonts/source-han-serif](https://github.com/adobe-fonts/source-han-serif) | otf | `2.003R` | 2026-10-24 03:26 UTC |
+| `dream-han-sans` | 梦源黑体 Dream Han Sans | [Pal3love/dream-han-cjk](https://github.com/Pal3love/dream-han-cjk) | ttf | `dream-3.03-sans-2.005-serif-2.003` | 2026-10-24 03:26 UTC |
+| `zhuque` | 朱雀仿宋 Zhuque Fangsong | [TrionesType/zhuque](https://github.com/TrionesType/zhuque) | ttf | `v0.212` | 2026-10-24 03:26 UTC |
+| `maple-mono` | 枫叶等宽 Maple Mono | [subframe7536/maple-font](https://github.com/subframe7536/maple-font) | ttf | `v7.9` | 2026-10-24 03:26 UTC |
+| `smiley-sans` | 得意黑 Smiley Sans | [atelier-anchor/smiley-sans](https://github.com/atelier-anchor/smiley-sans) | ttf | `v2.0.1` | 2026-10-24 03:26 UTC |
+<!-- fonts-table:end -->
+
+> 「最新版本」与「构建时间」由 CI 在每次构建后自动刷新，标记之间的内容无需手工维护；新增字体若未插入表格，会自动追加到表末。
 
 ## 添加新字体
 

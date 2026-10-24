@@ -13,8 +13,8 @@
 #      写入 module.prop、携带许可证、打包 zip；fonts.xml 与 font_fallback.xml 不在构建期
 #      生成，而是由 customize.sh 在安装时调用 fontgen 读取原厂配置、插入 CJK 族动态生成；
 #   4. 产物写到 dist/ 并输出发布信息，由工作流的 softprops/action-gh-release
-#      步骤创建 Release 并上传 zip；同时生成 dist/updates/<slug>.json（Magisk 更新清单），
-#      由工作流的 update 作业汇总后提交到 master 的 updates/。
+#      步骤创建 Release 并上传 zip；同时生成 dist/meta/<slug>/（Magisk 更新清单 + 构建时间），
+#      由工作流的 update 作业汇总后提交到 master（并提供给 README 字体表）。
 #
 # 依赖（ubuntu-latest 均已预装）：gh、jq、curl、zip、unzip；
 #   处理 .7z 归档时额外需要 p7zip-full（由工作流安装）。
@@ -243,19 +243,24 @@ zippath="$ROOT/dist/$zipname"
 (cd "$mod" && zip -rq "$zippath" .)
 info "$slug" "产物 dist/$zipname"
 
-# 生成 Magisk 更新清单（module.prop 的 updateJson 指向它），由工作流的 update 作业
-# 汇总后统一提交到 master 的 updates/。不放进模块 zip：它是模块之外的发布元数据。
+# 生成发布元数据（不放进模块 zip，属模块之外的发布信息）：
+#   dist/meta/<slug>/updates/<slug>.json     Magisk 更新清单，module.prop 的 updateJson 指向它
+#   dist/meta/<slug>/build-info/<slug>.json  构建时间，供 README 字体表展示（Magisk 不读取）
+# 放在同一目录下整体作为 artifact 上传，下载端的目录结构因此是确定的。
 # DRY_RUN 不产出，避免本地试跑生成指向不存在 release 的假清单。
 if [[ -z "$DRY_RUN" ]]; then
-  updates_dir="$ROOT/dist/updates"; mkdir -p "$updates_dir"
+  meta_dir="$ROOT/dist/meta/$slug"
+  mkdir -p "$meta_dir/updates" "$meta_dir/build-info"
   jq -n \
     --arg version "$tag" \
     --argjson versionCode "$version_code_value" \
     --arg zipUrl "https://github.com/$REPO/releases/download/$release_tag/$zipname" \
     --arg changelog "https://github.com/$REPO/releases/tag/$release_tag" \
     '{version: $version, versionCode: $versionCode, zipUrl: $zipUrl, changelog: $changelog}' \
-    > "$updates_dir/$slug.json"
-  info "$slug" "更新清单 dist/updates/$slug.json"
+    > "$meta_dir/updates/$slug.json"
+  jq -n --arg builtAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{builtAt: $builtAt}' \
+    > "$meta_dir/build-info/$slug.json"
+  info "$slug" "发布元数据 dist/meta/$slug"
 fi
 
 # 把发布信息输出给工作流的 softprops 步骤；本地 DRY_RUN 无 GITHUB_OUTPUT，自动跳过

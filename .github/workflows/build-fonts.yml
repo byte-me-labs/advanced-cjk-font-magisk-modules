@@ -153,18 +153,19 @@ jobs:
           files: dist/*.zip
           fail_on_unmatched_files: true
 
-      # 发布成功后才上传更新清单，避免清单指向不存在的 release。
+      # 发布成功后才上传发布元数据，避免清单指向不存在的 release。
       # 该步骤失败会跳过，次日定时任务的查重会认为该字体已发布而不再重建，
-      # 此时需手动触发一次该字体（SKIP_PUBLISHED=false）补齐清单。
-      - name: 上传更新清单 ${{ matrix.slug }}
+      # 此时需手动触发一次该字体（SKIP_PUBLISHED=false）补齐元数据。
+      - name: 上传发布元数据 ${{ matrix.slug }}
         if: steps.build.outputs.should_publish == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: update-${{ matrix.slug }}
-          path: dist/updates/${{ matrix.slug }}.json
+          path: dist/meta/${{ matrix.slug }}
           if-no-files-found: error
 
-  # 汇总各构建作业产出的更新清单，一次性提交到 master 的 updates/，供模块内 Magisk 检查更新。
+  # 汇总各构建作业产出的发布元数据（更新清单 + 构建时间），一次性提交到 master：
+  # updates/ 供模块内 Magisk 检查更新，README「支持的字体」表展示最新版本与构建时间。
   # 每个字体一个 artifact，合并后单次提交，避免多作业并发推送 master 产生冲突。
   update:
     needs: build
@@ -182,23 +183,28 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: 合并并提交 updates/
+      - name: 合并元数据并刷新 README
         run: |
           set -euo pipefail
           shopt -s nullglob
-          files=(artifacts/*.json)
+          files=(artifacts/updates/*.json)
           if (( ${#files[@]} == 0 )); then
-            echo "没有新的更新清单，跳过"
+            echo "没有新的发布元数据，跳过"
             exit 0
           fi
-          mkdir -p updates
+          mkdir -p updates .github/build-info
           cp -f "${files[@]}" updates/
+          infos=(artifacts/build-info/*.json)
+          if (( ${#infos[@]} )); then
+            cp -f "${infos[@]}" .github/build-info/
+          fi
+          node .github/scripts/render_readme.mjs
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add updates
+          git add updates .github/build-info README.md
           if git diff --cached --quiet; then
-            echo "updates/ 无变化，跳过提交"
+            echo "元数据无变化，跳过提交"
             exit 0
           fi
-          git commit -m "chore: 更新 Magisk 模块更新清单"
+          git commit -m "chore: 更新模块更新清单与 README 版本表"
           git push origin HEAD:master
