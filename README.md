@@ -82,7 +82,7 @@ Magisk 刷新模块列表时读取该文件，比较 `versionCode` 判断是否�
 | `lxgw-bright-code` | 霞鹜明亮代码 LXGW Bright Code | [lxgw/LxgwBright-Code](https://github.com/lxgw/LxgwBright-Code) | ttf | `26.10.22` | 2026-10-24 03:26 UTC |
 | `975hei` | 975黑体 LXGW 975Hei | [lxgw/975Hei](https://github.com/lxgw/975Hei) | ttf | `26.06.20` | 2026-10-24 03:26 UTC |
 | `975yuan` | 975圆体 LXGW 975Yuan | [lxgw/975Yuan](https://github.com/lxgw/975Yuan) | ttf | `26.07.26` | 2026-10-24 03:26 UTC |
-| `sarasa-gothic` | 更纱黑体 Sarasa Gothic | [be5invis/Sarasa-Gothic](https://github.com/be5invis/Sarasa-Gothic) | ttf | `v1.0.42` | 2026-10-24 03:26 UTC |
+| `sarasa-gothic` | 更纱黑体 Sarasa Gothic | [be5invis/Sarasa-Gothic](https://github.com/be5invis/Sarasa-Gothic) | ttf | `v1.0.43` | 2026-10-25 08:23 UTC |
 | `source-han-sans` | 思源黑体 Source Han Sans | [adobe-fonts/source-han-sans](https://github.com/adobe-fonts/source-han-sans) | otf | `2.005R` | 2026-10-24 03:26 UTC |
 | `source-han-serif` | 思源宋体 Source Han Serif | [adobe-fonts/source-han-serif](https://github.com/adobe-fonts/source-han-serif) | otf | `2.003R` | 2026-10-24 03:26 UTC |
 | `dream-han-sans` | 梦源黑体 Dream Han Sans | [Pal3love/dream-han-cjk](https://github.com/Pal3love/dream-han-cjk) | ttf | `dream-3.03-sans-2.005-serif-2.003` | 2026-10-24 03:26 UTC |
