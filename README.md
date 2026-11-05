@@ -77,7 +77,7 @@ Magisk 刷新模块列表时读取该文件，比较 `versionCode` 判断是否�
 | `lxgw-neo-zhisong` | 霞鹜新致宋 LXGW Neo ZhiSong | [lxgw/LxgwNeoZhiSong](https://github.com/lxgw/LxgwNeoZhiSong) | ttf | `v1.070` | 2026-10-24 03:26 UTC |
 | `lxgw-neo-xizhi-screen` | 霞鹜新晰黑屏幕版 LXGW Neo XiHei Screen | [lxgw/LxgwNeoXiZhi-Screen](https://github.com/lxgw/LxgwNeoXiZhi-Screen) | ttf | `26.08.21` | 2026-10-24 03:26 UTC |
 | `sim-xizhi` | 简晰知 Sim XiZhi | [lxgw/SimXiZhi](https://github.com/lxgw/SimXiZhi) | ttf | `v1.103` | 2026-10-24 03:26 UTC |
-| `lxgw-marker-gothic` | 霞鹜马科特黑体 LXGW Marker Gothic | [lxgw/LxgwMarkerGothic](https://github.com/lxgw/LxgwMarkerGothic) | ttf | `v1.004` | 2026-10-24 03:26 UTC |
+| `lxgw-marker-gothic` | 霞鹜马科特黑体 LXGW Marker Gothic | [lxgw/LxgwMarkerGothic](https://github.com/lxgw/LxgwMarkerGothic) | ttf | `v1.011` | 2026-11-05 10:53 UTC |
 | `lxgw-bright` | 霞鹜明亮 LXGW Bright | [lxgw/LxgwBright](https://github.com/lxgw/LxgwBright) | ttf | `26.10.22` | 2026-10-24 03:26 UTC |
 | `lxgw-bright-code` | 霞鹜明亮代码 LXGW Bright Code | [lxgw/LxgwBright-Code](https://github.com/lxgw/LxgwBright-Code) | ttf | `26.10.22` | 2026-10-24 03:26 UTC |
 | `975hei` | 975黑体 LXGW 975Hei | [lxgw/975Hei](https://github.com/lxgw/975Hei) | ttf | `26.06.20` | 2026-10-24 03:26 UTC |
