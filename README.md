@@ -71,13 +71,13 @@ Magisk 刷新模块列表时读取该文件，比较 `versionCode` 判断是否�
 | `lxgw-wenkai-screen` | 霞鹜文楷屏幕版 LXGW WenKai Screen | [lxgw/LxgwWenKai-Screen](https://github.com/lxgw/LxgwWenKai-Screen) | ttf | `v1.530` | 2026-10-24 03:26 UTC |
 | `lxgw-wenkai-gb` | 霞鹜文楷 GB LXGW WenKai GB | [lxgw/LxgwWenKaiGB](https://github.com/lxgw/LxgwWenKaiGB) | ttf | `v1.530` | 2026-10-24 03:26 UTC |
 | `lxgw-zhenkai` | 霞鹜臻楷 Slab 版 LXGW ZhenKai Slab | [lxgw/LxgwZhenKai](https://github.com/lxgw/LxgwZhenKai) | ttf | `v0.827` | 2026-10-24 03:26 UTC |
-| `lxgw-xihei` | 霞鹜晰黑 LXGW XiHei | [lxgw/LxgwXiHei](https://github.com/lxgw/LxgwXiHei) | ttf | `v1.002` | 2026-10-24 03:26 UTC |
-| `lxgw-zhisong` | 霞鹜致宋 LXGW ZhiSong | [lxgw/LxgwZhiSong](https://github.com/lxgw/LxgwZhiSong) | ttf | `v1.002` | 2026-10-24 03:26 UTC |
-| `lxgw-neo-xihei` | 霞鹜新晰黑 LXGW Neo XiHei | [lxgw/LxgwNeoXiHei](https://github.com/lxgw/LxgwNeoXiHei) | ttf | `v1.308` | 2026-10-24 03:26 UTC |
-| `lxgw-neo-zhisong` | 霞鹜新致宋 LXGW Neo ZhiSong | [lxgw/LxgwNeoZhiSong](https://github.com/lxgw/LxgwNeoZhiSong) | ttf | `v1.070` | 2026-10-24 03:26 UTC |
-| `lxgw-neo-xizhi-screen` | 霞鹜新晰黑屏幕版 LXGW Neo XiHei Screen | [lxgw/LxgwNeoXiZhi-Screen](https://github.com/lxgw/LxgwNeoXiZhi-Screen) | ttf | `26.08.21` | 2026-10-24 03:26 UTC |
+| `lxgw-xihei` | 霞鹜晰黑 LXGW XiHei | [lxgw/LxgwXiHei](https://github.com/lxgw/LxgwXiHei) | ttf | `v1.003` | 2026-11-11 10:55 UTC |
+| `lxgw-zhisong` | 霞鹜致宋 LXGW ZhiSong | [lxgw/LxgwZhiSong](https://github.com/lxgw/LxgwZhiSong) | ttf | `v1.003` | 2026-11-11 10:55 UTC |
+| `lxgw-neo-xihei` | 霞鹜新晰黑 LXGW Neo XiHei | [lxgw/LxgwNeoXiHei](https://github.com/lxgw/LxgwNeoXiHei) | ttf | `v1.309` | 2026-11-11 10:55 UTC |
+| `lxgw-neo-zhisong` | 霞鹜新致宋 LXGW Neo ZhiSong | [lxgw/LxgwNeoZhiSong](https://github.com/lxgw/LxgwNeoZhiSong) | ttf | `v1.071` | 2026-11-11 10:55 UTC |
+| `lxgw-neo-xizhi-screen` | 霞鹜新晰黑屏幕版 LXGW Neo XiHei Screen | [lxgw/LxgwNeoXiZhi-Screen](https://github.com/lxgw/LxgwNeoXiZhi-Screen) | ttf | `26.11.11` | 2026-11-11 10:55 UTC |
 | `sim-xizhi` | 简晰知 Sim XiZhi | [lxgw/SimXiZhi](https://github.com/lxgw/SimXiZhi) | ttf | `v1.103` | 2026-10-24 03:26 UTC |
-| `lxgw-marker-gothic` | 霞鹜马科特黑体 LXGW Marker Gothic | [lxgw/LxgwMarkerGothic](https://github.com/lxgw/LxgwMarkerGothic) | ttf | `v1.011` | 2026-11-05 10:53 UTC |
+| `lxgw-marker-gothic` | 霞鹜马科特黑体 LXGW Marker Gothic | [lxgw/LxgwMarkerGothic](https://github.com/lxgw/LxgwMarkerGothic) | ttf | `v1.012` | 2026-11-11 10:55 UTC |
 | `lxgw-bright` | 霞鹜明亮 LXGW Bright | [lxgw/LxgwBright](https://github.com/lxgw/LxgwBright) | ttf | `26.10.22` | 2026-10-24 03:26 UTC |
 | `lxgw-bright-code` | 霞鹜明亮代码 LXGW Bright Code | [lxgw/LxgwBright-Code](https://github.com/lxgw/LxgwBright-Code) | ttf | `26.10.22` | 2026-10-24 03:26 UTC |
 | `975hei` | 975黑体 LXGW 975Hei | [lxgw/975Hei](https://github.com/lxgw/975Hei) | ttf | `26.06.20` | 2026-10-24 03:26 UTC |
